@@ -88,8 +88,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: Release ${{ env.TAG_NAME }}
+          tag_name: ${{ env.NEW_VERSION_TAG }}
+          release_name: Release ${{ env.NEW_VERSION_TAG }}
           body: ${{ steps.Read-Release-File.outputs.CONTENT }}
           draft: false
           prerelease: false
