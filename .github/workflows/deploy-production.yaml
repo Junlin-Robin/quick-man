@@ -40,7 +40,7 @@ jobs:
             VERSION_TYPE=patch
           fi
 
-          NEW_VERSION_TAG=npm version $VERSION_TYPE -m "Upgrade to %s due to merge feature branches"
+          NEW_VERSION_TAG=$(npm version $VERSION_TYPE -m "Upgrade to %s due to merge feature branches")
 
           echo "-------------------------------------------------------------"
 
