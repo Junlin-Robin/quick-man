@@ -1,0 +1,1 @@
+import{j as r}from"./index-Dm4P_m8O.js";import{T as t}from"./index-CFMP38d3.js";function i(){return r.jsxs(r.Fragment,{children:[r.jsx(t.Title,{children:"频率计算"}),r.jsx("div",{style:{height:"100vh",backgroundColor:"pink"}})]})}export{i as default};
