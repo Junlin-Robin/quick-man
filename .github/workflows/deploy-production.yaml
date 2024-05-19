@@ -30,6 +30,7 @@ jobs:
       - name: Create and Push Tag
         env:
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }} # 2025-05-19过期
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # 判断当前是否指定指定版本号
           if [ -f 'merge-extra-info/.type' ] && grep -q 'VERSION_TYPE' 'merge-extra-info/.type'
@@ -50,7 +51,7 @@ jobs:
 
           echo "👷 Start move File..."
           mkdir -p .version/$NEW_VERSION_TAG
-          
+
           if [ -f merge-extra-info/.type ]
           then
             mv merge-extra-info/.type ".version/${NEW_VERSION_TAG}/"
@@ -58,12 +59,8 @@ jobs:
 
           mv merge-extra-info/log.md ".version/${NEW_VERSION_TAG}/"
 
-          echo "-------------------------------------------------------------"
-
           # 输出版本号到环境变量
           echo "NEW_VERSION_TAG=$NEW_VERSION_TAG" >> $GITHUB_ENV
-
-          echo "-------------------------------------------------------------"
 
           # 推送更新版本号和 tag 到 master 分支
           echo "🚗 推送更新版本号和 tag 到 master 分支..."
