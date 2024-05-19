@@ -38,8 +38,7 @@ jobs:
           # 判断当前是否指定指定版本号
           if [ -f 'merge-extra-info/.type' ] && grep -q 'VERSION_TYPE' 'merge-extra-info/.type'
           then
-            VERSION_TYPE_EXIST=true
-            VERSION_TYPE=$(grep 'VERSION_TYPE' '.versions/.type' | cut -d '=' -f2)
+            VERSION_TYPE=$(grep 'VERSION_TYPE' 'merge-extra-info/.type' | cut -d '=' -f2)
           else
             VERSION_TYPE=patch
           fi
@@ -53,14 +52,17 @@ jobs:
           echo "-------------------------------------------------------------"
 
           echo "👷 Start move File..."
-          mkdir -p .version/$NEW_VERSION_TAG
+          mkdir -p ".versions/$NEW_VERSION_TAG"
 
           if [ -f merge-extra-info/.type ]
           then
-            mv merge-extra-info/.type ".version/${NEW_VERSION_TAG}/"
+            mv merge-extra-info/.type ".versions/${NEW_VERSION_TAG}/"
+          else
+            touch .versions/${NEW_VERSION_TAG}/.type
+            echo "VERSION_TYPE=patch" >> .versions/${NEW_VERSION_TAG}/.type
           fi
 
-          mv merge-extra-info/log.md ".version/${NEW_VERSION_TAG}/"
+          mv merge-extra-info/log.md ".versions/${NEW_VERSION_TAG}/"
 
           # 输出版本号到环境变量
           echo "NEW_VERSION_TAG=$NEW_VERSION_TAG" >> $GITHUB_ENV
