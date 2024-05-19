@@ -58,8 +58,6 @@ jobs:
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.3.3
-        env:
-          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }} # 2025-05-19过期
         with:
           branch: gh-pages     # 部署到 gh-pages 分支
           folder: ${{ env.OUT_DIR }} # 部署目录见配置
