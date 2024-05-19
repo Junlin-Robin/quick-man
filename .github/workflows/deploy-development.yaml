@@ -1,0 +1,68 @@
+name: Deploy In DEV_ENV
+
+on:
+  push:
+    branches:
+      - feature/*
+
+jobs:
+  deploy-in-development:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # 确保获取所有历史以便正确部署
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Build
+        id: build-environment
+        run: |
+          ENV=development
+          echo "Current environment setted as $ENV 🧪"
+          echo "ENV=$ENV" >> $GITHUB_ENV
+
+          CURRENT_BRANCH=${{ github.ref_name }}
+          echo "Current branch is $CURRENT_BRANCH 🌿"
+
+          # 暂不设置泳道 
+          SWIMLANE=''
+          # 所有开发使用主测试环境
+          SUFFIX_URL=main
+
+          # 设置打包输出路径
+          OUT_DIR=$(grep 'REACT_BUILD_OUT_DIR' .env.$ENV | cut -d '=' -f2)/$SUFFIX_URL
+          echo "OUT_DIR=$OUT_DIR" >> $GITHUB_ENV
+
+          # 设置部署分支路径
+          TARGET_FOLDER=$(grep 'REACT_DEV_URL_BASE' .env.$ENV | cut -d '=' -f2)/$SUFFIX_URL
+          echo "TARGET_FOLDER=$TARGET_FOLDER" >> $GITHUB_ENV
+          echo "部署分支路径为：$(grep 'REACT_DEV_URL_BASE' .env.$ENV | cut -d '=' -f2)/$SUFFIX_URL"
+
+          echo "-------------------------------------------------------------"
+
+          echo "当前环境为：开发环境，打包输出目录为：$OUT_DIR，部署分支路径为：$TARGET_FOLDER 🧪"
+
+          echo "-------------------------------------------------------------"
+
+          echo "📦 开始对 vite 项目打包..."
+
+          yarn run build -- --mode $ENV
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4.3.3
+        with:
+          branch: gh-pages     # 部署到 gh-pages 分支
+          folder: ${{ env.OUT_DIR }} # 部署目录见配置
+          target-folder: /${{ env.TARGET_FOLDER }} # 部署目录
+          clean: true     # 先清理之前的部署
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  
