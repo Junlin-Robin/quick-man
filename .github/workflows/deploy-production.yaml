@@ -49,7 +49,7 @@ jobs:
           echo "-------------------------------------------------------------"
 
           echo "👷 Start move File..."
-          mkdir .version/$NEW_VERSION_TAG
+          mkdir -p .version/$NEW_VERSION_TAG
           mv merge-extra-info/.type ".version/${NEW_VERSION_TAG}/.type"
           mv merge-extra-info/log.md ".version/${NEW_VERSION_TAG}/log.md"
 
