@@ -50,7 +50,12 @@ jobs:
 
           echo "👷 Start move File..."
           mkdir -p .version/$NEW_VERSION_TAG
-          mv merge-extra-info/.type ".version/${NEW_VERSION_TAG}/"
+          
+          if [ -f merge-extra-info/.type ]
+          then
+            mv merge-extra-info/.type ".version/${NEW_VERSION_TAG}/"
+          fi
+
           mv merge-extra-info/log.md ".version/${NEW_VERSION_TAG}/"
 
           echo "-------------------------------------------------------------"
