@@ -1,0 +1,143 @@
+name: Create Tag And Deploy In PROD_ENV
+
+on:
+  pull_request:
+    branches:
+      - master
+    types: [closed]
+
+jobs:
+  create-Tag-Release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # 确保获取所有历史以便正确生成标签
+
+      - name: Setup Git
+        run: |
+          echo "🏠 Setting global git config informations"
+          git config --global user.email "347258143@qq.com"
+          git config --global user.name "Junlin-Robin"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Create and Push Tag
+        env:
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }} # 2025-05-19过期
+        run: |
+          # 判断当前是否指定指定版本号
+          if [ -f 'merge-extra-info/.type' ] && grep -q 'VERSION_TYPE' 'merge-extra-info/.type'
+          then
+            VERSION_TYPE_EXIST=true
+            VERSION_TYPE=$(grep 'VERSION_TYPE' '.versions/.type' | cut -d '=' -f2)
+          else
+            VERSION_TYPE=patch
+          fi
+
+          NEW_VERSION_TAG=npm version $VERSION_TYPE -m "Upgrade to %s due to merge feature branches"
+
+          echo "-------------------------------------------------------------"
+
+          echo "🚀 升级版本类型为：$VERSION_TYPE，升级后版本号为：$NEW_VERSION_TAG"
+
+          echo "-------------------------------------------------------------"
+
+          echo "👷 Start move File..."
+          mkdir .version/$NEW_VERSION_TAG
+          mv merge-extra-info/.type ".version/${NEW_VERSION_TAG}/.type"
+          mv merge-extra-info/log.md ".version/${NEW_VERSION_TAG}/log.md"
+
+          echo "-------------------------------------------------------------"
+
+          # 输出版本号到环境变量
+          echo "NEW_VERSION_TAG=$NEW_VERSION_TAG" >> $GITHUB_ENV
+
+          echo "-------------------------------------------------------------"
+
+          # 推送更新版本号和 tag 到 master 分支
+          echo "🚗 推送更新版本号和 tag 到 master 分支..."
+          git push --force
+          git push origin $NEW_VERSION_TAG
+
+      - name: Read Release Markdown File
+        id: Read-Release-File
+        run: |
+          echo "📖 读取更新版本日志文件..."
+          CONTENT=$(cat '.versions/${{env.NEW_VERSION_TAG}}/log.md')
+          CONTENT="${CONTENT//'%'/'%25'}"
+          CONTENT="${CONTENT//$'\n'/'%0A'}"
+          CONTENT="${CONTENT//$'\r'/'%0D'}"
+          echo "::set-output name=CONTENT::$CONTENT"
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: Release ${{ env.TAG_NAME }}
+          body: ${{ steps.Read-Release-File.outputs.CONTENT }}
+          draft: false
+          prerelease: false
+
+  deploy-in-production:
+    needs: [create-Tag-Release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # 确保获取所有历史以便正确生成标签
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: checkout tag
+        run: git checkout ${{ needs.create-tag.outputs.TAG }}
+
+      - name: Install Dependencies
+        run: yarn
+      
+      - name: Build
+        id: build-environment
+        run: |
+          echo "🔧 开始配置打包环境..."
+          ENV=production
+          echo "ENV=$ENV" >> $GITHUB_ENV
+
+          OUT_DIR=$(grep 'REACT_BUILD_OUT_DIR' .env.$ENV | cut -d '=' -f2)
+          echo "OUT_DIR=$OUT_DIR" >> $GITHUB_ENV
+
+          echo "-------------------------------------------------------------"
+
+          echo "当前环境为：生产环境，打包输出目录为：$OUT_DIR 🏭"
+
+          echo "-------------------------------------------------------------"
+
+          echo "📦 开始对 vite 项目打包..."
+          yarn run build -- --mode $ENV
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4.3.3
+        with:
+          branch: gh-pages     # 部署到 gh-pages 分支
+          folder: ${{ env.OUT_DIR }} # 部署目录见配置
+          target-folder: / # 部署根目录
+          clean: true     # 先清理之前的部署
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+    
+
+
+
+
+      
