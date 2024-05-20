@@ -15,6 +15,8 @@
   "contributors": [
     "Zuofan 2239520855@qq.com (https://github.com/Geistesblitz7)"
   ],
+  "description": "Quick calculation the isotope fractionation based on QM/MM",
+  "keywords": ["QM/MM", "Isotope Fractionation", "React", "Vite"],
   "license": "MIT",
   "scripts": {
     "dev": "vite",
