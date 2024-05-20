@@ -1,7 +1,7 @@
 {
   "name": "quick-man",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "homepage": "https://junlin-robin.github.io/quick-man/",
   "engines": {
@@ -16,7 +16,12 @@
     "Zuofan 2239520855@qq.com (https://github.com/Geistesblitz7)"
   ],
   "description": "Quick calculation the isotope fractionation based on QM/MM",
-  "keywords": ["QM/MM", "Isotope Fractionation", "React", "Vite"],
+  "keywords": [
+    "QM/MM",
+    "Isotope Fractionation",
+    "React",
+    "Vite"
+  ],
   "license": "MIT",
   "scripts": {
     "dev": "vite",
