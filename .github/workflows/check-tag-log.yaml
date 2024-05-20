@@ -14,8 +14,9 @@ jobs:
       - name: Check if log file exists
         run: |
           git fetch origin ${{ github.base_ref }}
+          git checkout ${{ github.head_ref }}
           LOG_FILE_PATH="^merge-extra-info/log.md$"
-          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -qE $LOG_FILE_PATH
+          if git diff --name-only origin/${{ github.base_ref }} | grep -qE $LOG_FILE_PATH
           then
             echo "合并日志文件存在，允许合并 ✅"
           else
