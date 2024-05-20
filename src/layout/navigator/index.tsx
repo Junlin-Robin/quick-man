@@ -14,7 +14,7 @@ export default function Header() {
           width: "100%",
         }}
       >
-        Header-2
+        Header
       </Layout.Header>
       <Layout style={{ position: 'relative', backgroundColor: '#fff' }}>
         <Sider />
