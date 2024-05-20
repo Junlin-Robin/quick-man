@@ -13,6 +13,7 @@ jobs:
 
       - name: Check if log file exists
         run: |
+          git fetch origin ${{ github.base_ref }}
           LOG_FILE_PATH="^merge-extra-info/log.md$"
           if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -qE $LOG_FILE_PATH
           then
