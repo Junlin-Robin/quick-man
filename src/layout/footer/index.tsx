@@ -8,7 +8,7 @@ export default function Footer(props: Iprops) {
   const { style } = props;
 
   return (
-    <Layout.Footer style={{ backgroundColor: "#eee", ...style }}>
+    <Layout.Footer style={{ backgroundColor: "red", ...style }}>
       Footer
     </Layout.Footer>
   );

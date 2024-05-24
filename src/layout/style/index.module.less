@@ -1,0 +1,47 @@
+@import '../../index.less';
+
+@header-height: 40px;
+@slider-width: 120px;
+
+.theme-light() {
+    .container {
+        background-color: @normal-theme-basic-bgc-color;
+        color: inherit;
+
+        .footer {
+            background-color: @normal-theme-basic-bgc-color;
+            color: inherit;
+        }
+
+        .navigator, .content {
+            background-color: @normal-theme-function-bgc-color;
+            color: inherit;
+        }
+    }
+    
+}
+
+.theme-dark() {
+    .container {
+        background-color: @dark-theme-basic-bgc-color;
+
+        .footer {
+            background-color: @dark-theme-basic-bgc-color;
+        }
+
+        .navigator, .content {
+            background-color: @dark-theme-function-bgc-color;
+        }
+    }
+}
+
+.container {
+    min-height: 100vh;
+    color: inherit;
+}
+
+.theme-light();
+
+@media (prefers-color-scheme: dark) {
+    .theme-dark();
+}
