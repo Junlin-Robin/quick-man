@@ -7,7 +7,7 @@ export default function FrequencyCalculation() {
 
   return (
     <>
-      <Typography.Title>力常数计算</Typography.Title>
+      <Typography.Title level={5} style={{ marginTop: 0 }}>力常数计算</Typography.Title>
       {/* <Input
         type="text"
         value={search || ""}

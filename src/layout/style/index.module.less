@@ -8,12 +8,12 @@
         background-color: @normal-theme-basic-bgc-color;
         color: inherit;
 
-        .footer {
+        .content {
             background-color: @normal-theme-basic-bgc-color;
             color: inherit;
         }
 
-        .navigator, .content {
+        .navigator, .slider, .footer {
             background-color: @normal-theme-function-bgc-color;
             color: inherit;
         }
@@ -25,11 +25,11 @@
     .container {
         background-color: @dark-theme-basic-bgc-color;
 
-        .footer {
+        .content {
             background-color: @dark-theme-basic-bgc-color;
         }
 
-        .navigator, .content {
+        .navigator, .slider, .footer {
             background-color: @dark-theme-function-bgc-color;
         }
     }
@@ -38,6 +38,9 @@
 .container {
     min-height: 100vh;
     color: inherit;
+    width: 100vw;
+
+    // overflow: hidden
 }
 
 .theme-light();

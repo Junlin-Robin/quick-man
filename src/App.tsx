@@ -1,8 +1,10 @@
 import { Suspense } from "react";
 import { HashRouter as Router, Route, Routes } from "react-router-dom";
 import routers from "./routers";
-import { Spin, Result } from "antd";
+import { Spin, Result, ConfigProvider, theme } from "antd";
 import PageLayout from "./layout";
+import zhCN from "antd/es/locale/zh_CN";
+import useWatchSystemTheme from "./hooks/use-watch-system-theme.ts";
 
 // import { QueryParamProvider } from "use-query-params";
 
@@ -12,32 +14,51 @@ function App() {
    */
   // const { history } = props;
 
+  const systemTheme = useWatchSystemTheme();
+
   // console.log("history", history);
 
   return (
-    <Router>
-      <PageLayout>
-        <Suspense fallback={<Spin />}>
-          <Routes>
-            {routers.map((route) => {
-              const { componentL, path } = route;
-              return <Route key={path} path={path} Component={componentL} />;
-            })}
-            <Route
-              key="unknown"
-              path="*"
-              Component={() => (
-                <Result
-                  status="404"
-                  title="404"
-                  subTitle="Sorry, the page you visited does not exist."
-                />
-              )}
-            />
-          </Routes>
-        </Suspense>
-      </PageLayout>
-    </Router>
+    <ConfigProvider
+      locale={zhCN}
+      theme={{
+        token: {
+          // Seed Token，影响范围大
+          // colorPrimary: 'yellow',
+          // borderRadius: 2,
+
+          // 派生变量，影响范围小
+          // colorBgContainer: '#f6ffed',
+        },
+        algorithm: systemTheme === 'light' ? [theme.defaultAlgorithm] : [theme.darkAlgorithm],
+      }}
+    >
+      <Router>
+        <PageLayout>
+          <Suspense fallback={<Spin />}>
+            <Routes>
+              {routers.map((route) => {
+                const { componentL, path } = route;
+                return <Route key={path} path={path} Component={componentL} />;
+              })}
+              <Route
+                key="unknown"
+                path="*"
+                Component={() => (
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+                    <Result
+                      status="404"
+                      title="404"
+                      subTitle="Sorry, the page you visited does not exist."
+                    />
+                  </div>
+                )}
+              />
+            </Routes>
+          </Suspense>
+        </PageLayout>
+      </Router>
+    </ConfigProvider>
     // <div style={{ minHeight: "100vh" }}>
     //   <div style={{ position: "sticky", top: 0}}>
     //     <div style={{position: 'relative', backgroundColor: 'pink', height: 60}}>

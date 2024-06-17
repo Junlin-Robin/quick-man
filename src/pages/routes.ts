@@ -6,7 +6,16 @@ export default [
     componentL: lazy(
       () =>
         import(
-          /* webpackChunkName: "frequency-isotope_fractionation" */ "./subpages/isotope-fractionation/frequency-calculation"
+          /* webpackChunkName: "frequency-isotope_fractionation" */ "./subpages/isotope-fractionation/frequency-calculation/views/overview"
+        )
+    ),
+  },
+  {
+    path: "/calculation/qm/isotope-fractionation/frequency/detail",
+    componentL: lazy(
+      () =>
+        import(
+          /* webpackChunkName: "frequency-isotope_fractionation_detail" */ "./subpages/isotope-fractionation/frequency-calculation/views/details"
         )
     ),
   },

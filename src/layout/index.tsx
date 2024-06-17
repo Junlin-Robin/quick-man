@@ -10,24 +10,14 @@ interface PageLayoutProps {
 const { useBreakpoint } = Grid
 export default function PageLayout(props: PageLayoutProps) {
   const { children } = props;
-  const { lg } = useBreakpoint();
+  const { md } = useBreakpoint();
   return (
     <Layout className={styles['container']}>
       <Navigator />
-      <Layout style={{ marginLeft: lg ? 200 : 0, transition: 'all .5s ease' }}>
-        <Layout.Content style={{ padding: '0 24px' }}>{children}</Layout.Content>
-        <Footer />
+      <Layout style={{ marginLeft: md ? 150 : 0, transition: 'all .5s ease', minHeight: 'calc(100vh - 64px)' }}>
+        <Layout.Content style={{ padding: '16px', minHeight: '80vh' }} className={styles['content']}>{children}</Layout.Content>
+        <Footer className={styles['footer']}/>
       </Layout>
     </Layout>
-    // <Layout style={{ minHeight: "100vh", backgroundColor: '#fff' }}>
-    //   <Layout.Header>
-    //     Header
-    //   </Layout.Header>
-    //   <Layout>
-    //     <Slider />
-    //     <Layout.Content style={{ padding: '0 24px', backgroundColor: '#fff' }}>{children}</Layout.Content>
-    //     <Footer />
-    //   </Layout>
-    // </Layout>
   );
 }
