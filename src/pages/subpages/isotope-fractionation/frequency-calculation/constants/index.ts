@@ -2,6 +2,16 @@ export const CalculationServies = [
     {
         label: '同位素分馏',
         value: 'isotope-fractionation',
+        children: [
+            {
+                label: '激化频率',
+                value: 'E-field'
+            },
+            {
+                label: '声子频率',
+                value: 'phonon'
+            },
+        ],
     },
     {
         label: '力常数',

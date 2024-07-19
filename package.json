@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.7",
+    "@ant-design/plots": "^2.2.4",
     "ahooks": "^3.7.11",
     "antd": "^5.17.0",
     "decimal.js": "^10.4.3",
@@ -40,6 +41,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.23.0",
+    "recoil": "^0.7.7",
     "use-query-params": "^2.2.1",
     "uuid": "^10.0.0"
   },

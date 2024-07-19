@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Layout, Menu } from "antd";
+import { useMount } from "ahooks";
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import frequencyLogo from 'public/frequency.svg';
@@ -20,9 +21,14 @@ export default function Sider(props: Iprops) {
   const [selectedKeys, setSelectedKeys] = useState('');
 
   useEffect(() => {
-    console.log({ location })
     setSelectedKeys(location.pathname)
   }, [location])
+
+  useMount(() => {
+    if (location.pathname === '/' || !location.pathname) {
+      navigate('/calculation/qm/isotope-fractionation/frequency')
+    }
+  });
 
   return (
     <div style={{ position: 'relative' }}>

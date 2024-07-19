@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { HashRouter as Router, Route, Routes } from "react-router-dom";
+import { Navigate, HashRouter as Router, Route, Routes } from "react-router-dom";
 import routers from "./routers";
 import { Spin, Result, ConfigProvider, theme } from "antd";
 import PageLayout from "./layout";
@@ -41,6 +41,7 @@ function App() {
                 const { componentL, path } = route;
                 return <Route key={path} path={path} Component={componentL} />;
               })}
+              <Route path="/" element={<Navigate replace to="/calculation/qm/isotope-fractionation/frequency" />} />
               <Route
                 key="unknown"
                 path="*"

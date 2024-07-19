@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { Card, Button, Space, Tag, Row, Col, Drawer, Popconfirm } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { Card, Button, Space, Tag, Row, Col, Drawer, Popconfirm, Tooltip, Typography } from 'antd';
 import { SettingOutlined, EditOutlined, DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import type { Moment } from 'moment';
@@ -7,12 +8,12 @@ import { isArray } from 'lodash';
 
 
 interface Props {
-    key?: string;
+    id?: string;
     title?: string;
     description?: {
         createTime: string | number | Moment;
         author: string | number;
-        elements: string[] | string;
+        elements: (string | React.ReactNode)[] | string | React.ReactNode;
         details: string;
     };
     deleteProject: (id: number) => void;
@@ -20,9 +21,11 @@ interface Props {
 }
 
 const ProjectCard = (props: Props) => {
-    const { key, description, title } = props;
+    const { description, title, id } = props;
 
     const [open, setOpen] = useState(false);
+
+    const navigate = useNavigate();
 
     const memoDescription = useMemo(() => {
         const { createTime, elements, author, details } = description || {};
@@ -55,24 +58,35 @@ const ProjectCard = (props: Props) => {
     return (
         <Card
             hoverable
-            key={key}
-            cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}
+            cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" onClick={() => navigate(`/calculation/qm/isotope-fractionation/frequency/detail?id=${id}`)} />}
             actions={[
-                <SettingOutlined key="setting" onClick={() => setOpen(true)} />,
-                <EditOutlined key="edit" />,
-                <Popconfirm
-                    title="删除工程"
-                    description="计算任务会一并删除，不可恢复，是否继续删除"
-                    // onConfirm={confirm}
-                    // onCancel={() => setOpen(false)}
-                    okText="确定"
-                    cancelText="取消"
-                    style={{width: '60px'}}
-                    icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                (
+                    <Tooltip title="进入工程">
+                        <SettingOutlined key="setting" onClick={() => navigate(`/calculation/qm/isotope-fractionation/frequency/detail?id=${id}`)} />
+                    </Tooltip>
+                ),
+                (
+                    <Tooltip title="修改工程">
+                        <EditOutlined key="edit" onClick={() => setOpen(true)} />
+                    </Tooltip>
+                ),
+                (
+                    <Popconfirm
+                        title="删除工程"
+                        description="计算任务会一并删除，不可恢复，是否继续删除"
+                        // onConfirm={confirm}
+                        // onCancel={() => setOpen(false)}
+                        okText="确定"
+                        cancelText="取消"
+                        style={{ width: '60px' }}
+                        icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
                     // placement="topRight"
-                >
-                    <DeleteOutlined key="delete" />
-                </Popconfirm>
+                    >
+                        <Tooltip title="删除工程">
+                            <DeleteOutlined key="delete" />
+                        </Tooltip>
+                    </Popconfirm>
+                )
             ]}
             style={{ overflow: 'hidden' }}
         >
@@ -86,7 +100,7 @@ const ProjectCard = (props: Props) => {
                 // size="large"
                 height="70%"
                 // width="calc(100% + 2px)"
-                // style={{border: 'none'}}
+                styles={{ content: { top: '-1px', left: '-1px', position: 'absolute', width: 'calc(100% + 2px)', zIndex: 1001 } }}
                 footer={(
                     <Row justify="end">
                         <Space>

@@ -1,14 +1,24 @@
-export const elementOptions = [
+export const elements = [
     {
-        label: 'Hy',
-        value: 'H',
+        name: 'H（氢）',
+        key: 'H',
+        index: 1,
+        overview: {
+            picture: '',
+            EN_name: 'Hydrogen',
+            relative_mass: '1.00794',
+            density: '',
+        },
+        properties: {
+
+        },
     },
     {
-        label: 'He',
-        value: 'H',
+        name: 'He（氦）',
+        key: 'He',
     },
     {
-        label: 'Li',
-        value: 'H',
+        name: 'Li（锂）',
+        key: 'Li',
     },
 ];

@@ -27,17 +27,18 @@ export default function Header(props) {
                                         type="text"
                                         icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                                         onClick={() => setCollapsed(!collapsed)}
-                                        style={{
-                                            fontSize: '16px',
-                                            width: 40,
-                                            height: 40,
-                                        }}
+                                        // style={{
+                                        //     fontSize: '20px',
+                                        //     width: 40,
+                                        //     height: 40,
+                                        // }}
+                                        size='large'
                                     />
                                 </Col>
                             )
                         }
                         <Col style={{ height: '64px' }}>
-                            <Avatar size={45} src={<img src={LogoSrc} alt="Logo" />} style={{ marginTop: '-5px' }} />
+                            <Avatar size={45} src={<img src={LogoSrc} alt="Logo" />} style={{ marginTop: '-8px' }} />
                         </Col>
                         <Col style={{ height: '64px' }}>
                             <Typography.Title level={3} style={{ lineHeight: '64px', padding: 0, margin: 0, display: 'inline-block' }} ellipsis>Sponge</Typography.Title>
