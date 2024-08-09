@@ -3,13 +3,14 @@ import { isProd } from '../utils/get-env';
 import { message } from 'antd';
 import { useMemoizedFn } from 'ahooks';
 
+const warningMessage = '当前浏览器不支持获取系统主题色，请使用谷歌最新版本的浏览器查看';
+
 export default function useWatchSystemTheme() {
     //系统主题色
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
     const checkBrowserSupport = useMemoizedFn(() => {
         if (!window.matchMedia) {
-            const warningMessage = '当前浏览器不支持获取系统主题色，请使用谷歌最新版本的浏览器查看';
             if (isProd) message.warning(warningMessage);
             else console.warn(warningMessage);
             return false;

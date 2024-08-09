@@ -1,19 +1,63 @@
-import {useEffect} from 'react';
-import { Avatar, Space, Row, Col, Typography, Menu, Button } from 'antd';
+import { useState } from 'react';
+import { Avatar, Space, Row, Col, Typography, Dropdown, Button, message } from 'antd';
 import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
+    UserOutlined,
+    LoginOutlined,
+    SyncOutlined,
 } from '@ant-design/icons';
 import LogoSrc from 'public/square-pants-logo.svg';
 // import Logo from './components/logo';
 
-export default function Header(props) {
-    const { collapsed, setCollapsed, md } = props;
-    useEffect(() => {
-        console.log({collapsed, setCollapsed, md})
-    }, [
-        collapsed, setCollapsed, md
-    ]);
+
+const items = [
+    {
+        key: 'exit',
+        label: (
+            <a href="#" onClick={(e) => {
+                e.preventDefault();
+                message.warning('功能开发中，敬请期待～')
+            }}>
+                <Space>
+                    <LoginOutlined />
+                    <span>退出登录</span>
+                </Space>
+            </a>
+        ),
+    },
+    {
+        key: 'change',
+        label: (
+            <a href="#"  onClick={(e) => {
+                e.preventDefault();
+                message.warning('功能开发中，敬请期待～')
+            }}>
+                <Space>
+                    <SyncOutlined />
+                    <span>切换账号</span>
+                </Space>
+            </a>
+        ),
+    },
+];
+
+interface IProps {
+    collapsed: boolean;
+    setCollapsed: (collapsed: boolean) => void;
+    isLargerThanMinWidth?: boolean;
+}
+
+export default function Header(props: IProps) {
+    const { collapsed, setCollapsed, isLargerThanMinWidth } = props;
+    const [isHovered, setIsHovered] = useState(false);
+    const handleMouseEnter = () => {
+        setIsHovered(true);
+    };
+
+    const handleMouseLeave = () => {
+        setIsHovered(false);
+    };
 
     return (
         <>
@@ -21,17 +65,12 @@ export default function Header(props) {
                 <Col>
                     <Space align="center">
                         {
-                            !md && (
+                            !isLargerThanMinWidth && (
                                 <Col style={{ height: '64px' }}>
                                     <Button
                                         type="text"
                                         icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                                         onClick={() => setCollapsed(!collapsed)}
-                                        // style={{
-                                        //     fontSize: '20px',
-                                        //     width: 40,
-                                        //     height: 40,
-                                        // }}
                                         size='large'
                                     />
                                 </Col>
@@ -47,17 +86,15 @@ export default function Header(props) {
                 </Col>
                 <Col style={{ height: '64px' }}>
                     <Space>
-                        {/* <Menu
-                            theme="light"
-                            mode="horizontal"
-                            defaultSelectedKeys={['2']}
-                            items={new Array(3).fill(null).map((_, index) => ({
-                                key: index + 1,
-                                label: `nav ${index + 1}`,
-                            }))}
-                            style={{ flex: 1, minWidth: 0 }}
-                        /> */}
-                        <Avatar />
+                        {/* 补充多页面链接 */}
+                        <Dropdown menu={{ items }}>
+                            <Space onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} style={{ height: '45px', borderRadius: '8px', padding: '0 8px', backgroundColor: isHovered ? '#F5F5F5' : '#fff' }}>
+                                <Avatar size={30}>
+                                    <UserOutlined />
+                                </Avatar>
+                                <Typography.Text type='secondary' ellipsis style={{ fontSize: 15,lineHeight: '60px', fontWeight: 400 }}>admin</Typography.Text>
+                            </Space>
+                        </Dropdown>
                     </Space>
                 </Col>
             </Row>

@@ -1,3 +1,5 @@
+import decimal from 'decimal.js';
+
 import {
     regexAtomNumber,
     regexAtomMassInfo,
@@ -6,7 +8,7 @@ import {
     regexAtomPositionMatrix,
 } from './constants';
 
-import { judgeIsSupport } from './judgement';
+import { judgeIsSupport, judgeIsCalculatePhonon } from './judgement';
 
 /**
  * 获取晶胞固定的原子信息
@@ -41,20 +43,22 @@ function getIsotopeMassInfo(params: {
 }) {
     const { castepText_Heavy, castepText_Light } = params;
 
-    const atomMassInfo_heavy = castepText_Heavy.match(regexAtomMassInfo)?.[1]?.split(/\r?\n/).map((item) => item.trim()).filter(Boolean).map((item) => {
-        const [name, mass] = item.split(/\s+/);
-        return {
-            name,
-            mass,
-        }
-    }) || [];
-    const atomMassInfo_light = castepText_Light.match(regexAtomMassInfo)?.[1]?.split(/\r?\n/).map((item) => item.trim()).filter(Boolean).map((item) => {
-        const [name, mass] = item.split(/\s+/);
-        return {
-            name,
-            mass,
-        }
-    }) || [];
+    const atomMassInfo_heavy = castepText_Heavy.match(regexAtomMassInfo)?.[1]?.
+        split(/\r?\n/).map((item) => item.trim()).filter(Boolean).map((item) => {
+            const [name, mass] = item.split(/\s+/);
+            return {
+                name,
+                mass,
+            }
+        }) || [];
+    const atomMassInfo_light = castepText_Light.match(regexAtomMassInfo)?.[1]?.
+        split(/\r?\n/).map((item) => item.trim()).filter(Boolean).map((item) => {
+            const [name, mass] = item.split(/\s+/);
+            return {
+                name,
+                mass,
+            }
+        }) || [];
 
     const isotopeInfo = [];
 
@@ -63,6 +67,7 @@ function getIsotopeMassInfo(params: {
         const { name: atomName_light, mass: mass_light } = atomMassInfo_light[i];
 
         if (atomName_light === atomName_heavy && mass_heavy !== mass_light) {
+            if (new decimal(mass_light).greaterThanOrEqualTo(mass_heavy)) throw new Error('轻、重同位素质量设置相反，检查上传文件是否对应！');
             isotopeInfo.push({ isotope: atomName_heavy, massSetting: { heavy: mass_heavy, light: mass_light } });
         }
     }
@@ -72,7 +77,7 @@ function getIsotopeMassInfo(params: {
     return isotopeInfo[0];
 }
 
-interface ReturnCellInfo {
+export interface ReturnCellInfo {
     atomNumbers: number;
     atomTypeNumbers: number;
     atomPositionMatrix: {
@@ -97,22 +102,41 @@ interface ReturnCellInfo {
  * @param text castep文件|文件列表
  * @returns {Array} atomNumbers-原子数；fixedAtomNumbers-固定原子数；atomTypeNumbers-原子类型数；atomPositionMatrix-原子位置信息
  */
-export function getCellInfo(text: { castep: { heavy: string, light: string }, cell?: string }, isFixed?: boolean): Promise<ReturnCellInfo>;
-export function getCellInfo(text: { castep: { heavy: string, light: string }, cell?: string }[], isFixed?: boolean): Promise<ReturnCellInfo[]>;
+export function getCellInfo(params: { castep: { heavy: string, light: string }, cell?: string, isFixed?: boolean }): Promise<ReturnCellInfo>;
+export function getCellInfo(params: { castep: { heavy: string, light: string }, cell?: string, isFixed?: boolean }[]): Promise<ReturnCellInfo[]>;
 export function getCellInfo(
-    text: { castep: { heavy: string, light: string }, cell?: string } | { castep: { heavy: string, light: string }, cell?: string }[],
-    isFixed?: boolean
+    params: { castep: { heavy: string, light: string }, cell?: string, isFixed?: boolean } | { castep: { heavy: string, light: string }, cell?: string, isFixed?: boolean }[]
 ) {
-    if (Array.isArray(text)) return Promise.all(text.map((item) => getCellInfo(item, isFixed)));
+    if (Array.isArray(params)) return Promise.all(params.map((item) => getCellInfo(item)));
 
     return new Promise((res, rej) => {
-        const cellText = text.cell || '';
-        const { heavy: castepText_Heavy, light: castepText_Light } = text.castep;
+        const cellText = params.cell || '';
+        const { heavy: castepText_Heavy, light: castepText_Light } = params.castep;
+        const isFixed = params.isFixed;
         //判断是否支持版本信息
         const { isSupport, message } = judgeIsSupport(castepText_Heavy);
         if (!isSupport) return rej(new Error(message));
 
-        if (isFixed && !cellText) return rej(new Error('缺少cell文件！')); //如果固定原子，但是没有cell文件，则报错
+        if (isFixed && !cellText) return rej(new Error('未上传 .cell 文件！')); //如果固定原子，但是没有cell文件，则报错
+        if (cellText && !isFixed) return rej(new Error('.cell 文件解析显示计算同位素原子有被固定，请检查选择固定原子选项是否勾选正确！')); //如果cell文件，但是没有指定固定原子，则报错
+
+        //判断是否计算的是声子频率
+        const isPhonon_heavy = judgeIsCalculatePhonon(castepText_Heavy);
+        const isPhonon_light = judgeIsCalculatePhonon(castepText_Light);
+        if (isPhonon_heavy !== isPhonon_light) return rej(new Error('轻、重同位素计算文件设置的计算类型不一致，请检查后重新计算！'));
+        //判断计算类型是否是声子频率
+        const isPhonon = isPhonon_heavy;
+
+
+        /**
+         * 声子频率处理方式，待补充！！！！！！！！
+         * ！！！！！！！1
+         * ！！！！！！！
+         */
+        if (isPhonon) {
+            return;
+        }
+
         //固定原子信息
         let fixedAtomInfos: {
             atom: string;
@@ -130,7 +154,7 @@ export function getCellInfo(
             const atomInfoArray = atomItem?.split(/\s+/);
             const atom = atomInfoArray?.[1]; //第一个是标志位
             const index = atomInfoArray?.[2];
-            const positionArray = [atomInfoArray?.[3], atomInfoArray?.[4], atomInfoArray?.[5]] || [];
+            const positionArray = [atomInfoArray?.[3], atomInfoArray?.[4], atomInfoArray?.[5]];
             let fixed = false;
 
             if (isFixed && fixedAtomInfos.length) {

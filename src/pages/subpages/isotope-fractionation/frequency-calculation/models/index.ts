@@ -1,0 +1,45 @@
+import { SOFTERWARE_TYPE, TASK_CALCULATION_STATUS, FILE_UPLOAD_STATUS } from '../constants';
+import type { ReturnInfo, ReturnCellInfo } from '@/packages/castep/formatter';
+import type { IsotopeFractionationReturn } from '@/packages/castep/calculation/isotope-fractionation'
+
+export interface TaskDetail {
+    name: string;
+    id: string;
+    createTime: number;
+    updateTime: number;
+    calculationStatus: TASK_CALCULATION_STATUS;
+    isFixed: boolean;
+    calculationParams: {
+        softWare: SOFTERWARE_TYPE;
+        /**是否计算的声子频率 */
+        isPhonon: boolean;
+        frequencyInfo: {
+            heavy: ReturnInfo;
+            light: ReturnInfo;
+        };
+        cellInfo: ReturnCellInfo;
+    };
+}
+
+export interface TaskResult {
+    isotopeFractionation?: IsotopeFractionationReturn;
+    forceConstants?: string;
+}
+
+export interface FileInfoType {
+    name: string;
+    uid: string;
+    status: FILE_UPLOAD_STATUS
+}
+
+export type TaskDataType = Array<{
+    name: string;
+    id: string;
+    taskDetail: TaskDetail;
+    fileInfoList: {
+        light: FileInfoType[];
+        heavy: FileInfoType[];
+        cell: FileInfoType[];
+    };
+    taskResult?: TaskResult;
+}>

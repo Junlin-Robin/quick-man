@@ -1,22 +1,38 @@
 import decimal from 'decimal.js';
 
-import { getCellInfo } from '../../formatter/get-cell-info';
-import getVibrationFrequencyInfo from '../../formatter/get-vibration-frequency-info';
+// import { getCellInfo } from '../../formatter/get-cell-info';
+// import getVibrationFrequencyInfo from '../../formatter/get-vibration-frequency-info';
 import { c, h, k } from '../constants';
 import { T } from './constants';
 
-/**
- * 计算分馏
- */
-export function calculateISOFractionationFromFrequencyByCASTEP(params: {
+export type IsotopeFractionationReturn = Array<{
+    T: {
+        celsius: string;
+        kelvin: string;
+    };
+    PFR: string[];
+    RPFR: string;
+    beta: string;
+    fractionation: string;
+}>
+
+export interface IsotopeFractionationParams {
     freq: {
         heavy: string[];
         light: string[];
     };
     cell: {
         isotopeNumber: number;
-    }
-}) {
+    };
+}
+/**
+ * 计算分馏
+ */
+export function calculateISOFractionationFromFrequencyByCASTEP(params: IsotopeFractionationParams): Promise<IsotopeFractionationReturn>;
+export function calculateISOFractionationFromFrequencyByCASTEP(params: IsotopeFractionationParams[]): Promise<IsotopeFractionationReturn[]>;
+export function calculateISOFractionationFromFrequencyByCASTEP(params: IsotopeFractionationParams | IsotopeFractionationParams[]): Promise<IsotopeFractionationReturn | IsotopeFractionationReturn[]> {
+    if (Array.isArray(params)) return Promise.all(params.map((param) => calculateISOFractionationFromFrequencyByCASTEP(param)));
+    
     const { freq, cell } = params;
     const { heavy: waveNumber_heavy, light: waveNumber_light } = freq || {};
     const { isotopeNumber } = cell || {};
@@ -24,12 +40,13 @@ export function calculateISOFractionationFromFrequencyByCASTEP(params: {
     return new Promise((res, rej) => {
         if (!waveNumber_heavy || !waveNumber_light || !isotopeNumber) return rej(new Error('缺少计算必要参数！'));
 
-        const angular_freq_heavy = waveNumber_heavy.map((item) => decimal.mul(item, c));
-        const angular_freq_light = waveNumber_light.map((item) => decimal.mul(item, c));
+        const angular_freq_heavy = waveNumber_heavy.map((item) => decimal.mul(item, c).toString());
+        const angular_freq_light = waveNumber_light.map((item) => decimal.mul(item, c).toString());
 
         const fractionationCalculateResults = T.map(({ kelvin: kelvin_t, celsius }) => {
-            const u_heavy = angular_freq_heavy.map((angular_heavy) => decimal.mul(angular_heavy, h).div(k).div(kelvin_t));
-            const u_light = angular_freq_light.map((angular_light) => decimal.mul(angular_light, h).div(k).div(kelvin_t));
+            const u_heavy = angular_freq_heavy.map((angular_heavy) => decimal.mul(angular_heavy, h).div(k).div(kelvin_t).toString());
+            const u_light = angular_freq_light.map((angular_light) => decimal.mul(angular_light, h).div(k).div(kelvin_t).toString());
+
 
             const PFR = [];
             for (let i = 0; i < u_heavy.length; i++) {
@@ -61,22 +78,25 @@ export function calculateISOFractionationFromFrequencyByCASTEP(params: {
     });
 }
 
-// export default async function calculateIsotopeFractionation(text: { castep: { heavy: string, light: string }, cell?: string }, isFixed?: boolean): Prmose<any>;
-// export default async function calculateIsotopeFractionation(text: { castep: { heavy: string, light: string }, cell?: string }[], isFixed?: boolean): Prmose<any>;
-export default async function calculateIsotopeFractionationByCASTEP(params: {
-    task: { castep: { heavy: string, light: string }, cell?: string, fixAtoms?: boolean }
-    | { castep: { heavy: string, light: string }, cell?: string, fixAtoms?: boolean }[]
-}) {
-    const { task } = params;
-    if (Array.isArray(task)) return Promise.all(task.map((taskItem) => calculateIsotopeFractionationByCASTEP({ task: taskItem })));
+// export default async function calculateIsotopeFractionationByCASTEP(text: { castep: { heavy: string, light: string }, cell?: string }, isFixed?: boolean): Prmose<any>;
+// export default async function calculateIsotopeFractionationByCASTEP(text: { castep: { heavy: string, light: string }, cell?: string }[], isFixed?: boolean): Prmose<any>;
+// export default async function calculateIsotopeFractionationByCASTEP(params: {
+//     task: { castep: { heavy: string, light: string }, cell?: string, fixAtoms?: boolean }
+//     | { castep: { heavy: string, light: string }, cell?: string, fixAtoms?: boolean }[]
+// }) {
+//     const { task } = params;
+//     if (Array.isArray(task)) return Promise.all(task.map((taskItem) => calculateIsotopeFractionationByCASTEP({ task: taskItem })));
 
-        const { castep: castepFiles, cell, fixAtoms } = task || {};
-        const { heavy: heavyFile, light: lightFile } = castepFiles || {};
-        if (fixAtoms && !cell) throw new Error('缺少cell文件！');
-        if (!heavyFile || !lightFile) throw new Error('缺少castep文件！');
+//     const { castep: castepFiles, cell, fixAtoms } = task || {};
+//     const { heavy: heavyFile, light: lightFile } = castepFiles || {};
+//     return new Promise((res, rej) => {
+//         if (isFixed && !cell) throw new Error('缺少cell文件！');
+//         if (fixAtoms && !cell) throw new Error('缺少cell文件！');
+//         if (!heavyFile || !lightFile) throw new Error('缺少castep文件！');
 
-        const [vibrationFrequencyInfo_heavy, vibrationFrequencyInfo_light] = await getVibrationFrequencyInfo([heavyFile,lightFile]);
-        const 
+//         const [vibrationFrequencyInfo_heavy, vibrationFrequencyInfo_light] = await getVibrationFrequencyInfo([heavyFile, lightFile]);
+//         const
+//     })
 
 
-}
+// }

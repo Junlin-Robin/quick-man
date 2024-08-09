@@ -4,9 +4,17 @@
 export const VERSION = '2017';
 
 /**
- * 支持的计算模式：红外频率和声子频率
+ * 支持计算类型的枚举值
  */
-export const CALCULATION_TYPES = ['Phonon followed by E-field', ''];
+export enum CALCULATION_TYPE_ENUM {
+    E_FIELD = 'Phonon followed by E-field',
+    PHONON = 'Phonon',
+}
+
+/**
+ * 支持的计算模式：红外频率和声子频率，用于判断文件计算类型是否符合要求
+ */
+export const CALCULATION_TYPES = [CALCULATION_TYPE_ENUM.E_FIELD, CALCULATION_TYPE_ENUM.PHONON];
 
 /**
  * 表头枚举值

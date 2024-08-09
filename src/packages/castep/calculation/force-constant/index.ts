@@ -4,7 +4,7 @@ import {amu, c, pai} from '../constants';
 /**
  * 计算分馏
  */
-export function calculateForceConstantFromFrequency(params: {
+export interface ForceConstantParams {
     freq: {
         heavy: string[];
         light: string[];
@@ -16,7 +16,11 @@ export function calculateForceConstantFromFrequency(params: {
             light: string;
         };
     }
-}) {
+}
+export function calculateForceConstantFromFrequency(params: ForceConstantParams): Promise<{forceConstant: string}>
+export function calculateForceConstantFromFrequency(params: ForceConstantParams[]): Promise<{forceConstant: string}[]>
+export function calculateForceConstantFromFrequency(params: ForceConstantParams | ForceConstantParams[]) {
+    if (Array.isArray(params)) return Promise.all(params.map((param) => calculateForceConstantFromFrequency(param)));
     const { freq, cell } = params;
     const { heavy: waveNumber_heavy, light: waveNumber_light } = freq || {};
     const { isotopeNumber, massSetting } = cell || {};

@@ -5,9 +5,9 @@ import {
     VIBRATION_FREQUENCY_TABLE_HEADERS_ENUM,
 } from './constants';
 
-import { judgeIsSupport, judgeIsCalculateRaman } from './judgement';
+import { judgeIsSupport, judgeIsCalculateRaman, judgeIsCalculatePhonon } from './judgement';
 
-interface ReturnInfo {
+export interface ReturnInfo {
     frequency: string[];
     ir: string[];
     irActive: boolean[];
@@ -20,9 +20,9 @@ interface ReturnInfo {
  * @param text castep文件|文件列表
  * @returns {Array} frequency-振动频率；ir-红外强度；irActive-是否有红外活性；raman-拉曼强度；ramanActive-是否有拉曼活性
  */
-export default function getVibrationFrequencyInfo(text: string): Promise<ReturnInfo>;
-export default function getVibrationFrequencyInfo(text: string[]): Promise<ReturnInfo[]>;
-export default function getVibrationFrequencyInfo(text: string | string[]) {
+export function getVibrationFrequencyInfo(text: string): Promise<ReturnInfo>;
+export function getVibrationFrequencyInfo(text: string[]): Promise<ReturnInfo[]>;
+export function getVibrationFrequencyInfo(text: string | string[]) {
     if (Array.isArray(text)) return Promise.all(text.map((textItem) => getVibrationFrequencyInfo(textItem))) //判断如果是文件列表，则依次处理返回
 
     return new Promise((res, rej) => {
@@ -30,7 +30,17 @@ export default function getVibrationFrequencyInfo(text: string | string[]) {
         const { isSupport, message } = judgeIsSupport(text);
         if (!isSupport) rej(new Error(message));
 
+        //判断计算类型是否是声子频率
+        const isPhonon = judgeIsCalculatePhonon(text);
 
+        /**
+        * 声子频率处理方式，待补充！！！！！！！！
+        * ！！！！！！！1
+        * ！！！！！！！
+        */
+        if (isPhonon) {
+            return;
+        }
         //获取频率矩阵信息
         const vibrationFrequencyMatchMatrix = text.match(regexVibrationFrequencyMatrix) || []; //匹配数组
         const isCalculateRaman = judgeIsCalculateRaman(text); //判断是否计算了拉曼频率

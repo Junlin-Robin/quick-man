@@ -12,13 +12,13 @@ export default function useTriggerSlider() {
     useEffect(() => {
         if (md) setCollapsed(false);
         else setCollapsed(true);
-        console.log(111)
     }, [md]);
 
     return {
         collapsed,
         setCollapsed,
-        md,
+        /**是否比设定的最小宽度大 */
+        isLargerThanMinWidth: md,
     };
 
 }

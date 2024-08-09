@@ -6,6 +6,7 @@ import "./index.less";
 import { ConfigProvider } from "antd";
 import zhCN from "antd/es/locale/zh_CN";
 
+
 // const history = createHashHistory();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

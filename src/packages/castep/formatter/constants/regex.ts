@@ -8,7 +8,7 @@ export const regexVibrationFrequencyMatrix = /\+\s+\d+\s+-?\d+\.?\d+\s+[a-d]\s+\
  * 匹配CASTEP版本信息
  * 版本，提取第二个匹配内容
  */
-export const regexCastepVersion = /Materials Studio CASTEP version (\d)+/;
+export const regexCastepVersion = /Materials Studio CASTEP version (\d+)/;
 
 /**
  * 匹配计算类型
@@ -20,13 +20,13 @@ export const regexCalculationType = /type of calculation\s+:\s+(\w(?:\w|\s|-)*)(
  * 匹配原子数目
  * 原子数，提取第二个匹配内容
  */
-export const regexAtomNumber = /Total number of ions in cell\s+=\s+(\d)+/;
+export const regexAtomNumber = /Total number of ions in cell\s+=\s+(\d+)/;
 
 /**
  * 匹配原子种类数目
  * 原子种类数目，提取第二个匹配内容
  */
-export const regexAtomTypeNumber = /Total number of species in cell\s+=\s+(\d)+/;
+export const regexAtomTypeNumber = /Total number of species in cell\s+=\s+(\d+)/;
 
 /**
  * 匹配原子信息位置矩阵
