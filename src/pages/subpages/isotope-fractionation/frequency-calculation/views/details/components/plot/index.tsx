@@ -11,7 +11,9 @@ import { CALCULATION_SERVICE, CalculationServiceMap } from '../../../../constant
 import { formatterData } from './utils';
 
 import type { CalculationResults } from '../../models';
-import type { IsotopeFractionationData } from './models';
+import type { IsotopeFractionationData, ForceConstantData } from './models';
+import useWatchSystemTheme from '@/hooks/use-watch-system-theme';
+import useTriggerSlider from '@/hooks/use-trigger-slider';
 
 
 interface IProps {
@@ -24,6 +26,9 @@ export default function FrequencyPlotCard(props: IProps) {
 
     const { dataSource, type, loading } = props;
 
+    const theme = useWatchSystemTheme(); //系统色
+    const { isLargerThanMinWidth } = useTriggerSlider(); //是否小屏幕
+
     const chartRef = useRef<Chart | null>(null);
 
     const titleText = useMemo(() => `${CalculationServiceMap[type] || ''}-趋势图`, [type]);
@@ -35,32 +40,42 @@ export default function FrequencyPlotCard(props: IProps) {
         xField: 'temperature',
         yField: 'fractionation',
         nameField: 'name',
-        axis: { x: { title: '123', size: 40 }, y: { title: '345', size: 50 } },
+        axis: { x: { title: '123', size: 40 }, y: { title: '345', size: 50 } }, //轴标题
         seriesField: 'name',
         colorField: 'name',
-        slider: {
+        slider: isLargerThanMinWidth ? {
             x: true,
             y: true,
-        },
+        } : undefined,
         tooltip: {
             title: (text: IsotopeFractionationData) => `温度：${text.kelvin}（K） ${text.celsius}（°C）`,
             items: [(text: IsotopeFractionationData) => `1000lnβ：${text.fractionation}（‰）`],
         },
+        theme,
+        annotations: {
+            style: {
+                stroke: 'red',
+                lineWidth: 2, // 辅助线宽度
+                lineDash: [4, 4], // 虚线样式
+            }
+        }
     };
 
     const scatterConfig = {
         data: formattered,
-        xField: 'forceConstant',
-        yField: 'fractionation',
-        slider: {
+        xField: 'fractionation',
+        yField: 'forceConstant',
+        slider: isLargerThanMinWidth ? {
             x: true,
             y: true,
-        },
+        } : undefined,
+        theme,
         // axis: { x: { title: false, size: 40 }, y: { title: false, size: 50 } },
         seriesField: 'name',
         colorField: 'name',
-        xAxis: {
-            // formatterData: (...arg) => console.log({arg}),
+        tooltip: {
+            title: (text: ForceConstantData) => `${text.name} `,
+            items: [(text: ForceConstantData) => `1000lnβ：${text.fractionation}（‰）`, (text: ForceConstantData) => `力常数：${text.forceConstant}（N/m^2）`],
         },
 
     };
