@@ -8,7 +8,7 @@ import isotopeFractionationDarkUrl from 'public/isotope-fractionation-dark.svg';
  */
 export const MenuList = [
     {
-        label: '同位素分馏计算',
+        label: '同位素分馏',
         path: '/calculaion/qm/isotope-fractionation/frequency',
         key: '/calculation/qm/isotope-fractionation/frequency',
         icon: {
