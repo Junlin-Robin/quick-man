@@ -17,10 +17,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install Dependencies
         run: yarn
+
+      - name: Lint
+        run: yarn lint
 
       - name: Build
         id: build-environment
@@ -59,10 +62,8 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
-          branch: gh-pages     # 部署到 gh-pages 分支
+          branch: gh-pages # 部署到 gh-pages 分支
           folder: ${{ env.OUT_DIR }} # 部署目录见配置
           target-folder: /${{ env.TARGET_FOLDER }} # 部署目录
-          clean: true     # 先清理之前的部署
+          clean: true # 先清理之前的部署
           token: ${{ secrets.GITHUB_TOKEN }}
-
-  

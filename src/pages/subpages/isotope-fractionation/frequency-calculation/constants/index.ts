@@ -14,7 +14,7 @@ export enum CALCULATION_SERVICE {
 }
 
 export const CalculationServiceMap = Object.freeze({
-    [CALCULATION_SERVICE.E_FIELD]: '激化频率',
+    [CALCULATION_SERVICE.E_FIELD]: '外电场',
     [CALCULATION_SERVICE.PHONON]: '声子频率',
     [CALCULATION_SERVICE.ISOTOPE_FRACTIONATION]: '同位素分馏',
     [CALCULATION_SERVICE.FORCE_CONSTANT]: '力常数',

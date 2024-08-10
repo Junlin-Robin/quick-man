@@ -147,18 +147,18 @@ export default function TaskCard(props: IProps) {
             }}
         >
             <Row wrap={false}>
-                <Col span={7}>同位素：</Col>
+                <Col style={{ minWidth: '100px' }}>同位素：</Col>
                 <Col>{taskDetail?.calculationParams?.cellInfo?.isotopeSetting?.isotope}</Col>
             </Row>
             <Row wrap={false}>
-                <Col span={7}>同位素质量：</Col>
+                <Col style={{ minWidth: '100px' }}>同位素质量：</Col>
                 <Col>
                     <Tag color="#13c2c2">轻：{new decimal(taskDetail?.calculationParams.cellInfo.isotopeSetting.massSetting.light || 0).toFixed(2).toString()}</Tag>
                     <Tag color="#722ed1">重：{new decimal(taskDetail?.calculationParams.cellInfo.isotopeSetting.massSetting.heavy || 0).toFixed(2).toString()}</Tag>
                 </Col>
             </Row>
             <Row wrap={false}>
-                <Col span={7}>上传文件信息：</Col>
+                <Col style={{ minWidth: '100px' }}>上传文件信息：</Col>
                 <Col>
                     <Space>
                         {
@@ -175,11 +175,11 @@ export default function TaskCard(props: IProps) {
                 </Col>
             </Row>
             <Row wrap={false}>
-                <Col span={7}>任务创建时间：</Col>
+                <Col style={{ minWidth: '100px' }}>任务创建时间：</Col>
                 <Col>{moment(taskDetail?.createTime).format('YYYY-MM-DD HH:mm:ss')}</Col>
             </Row>
             <Row wrap={false}>
-                <Col span={7}>任务修改时间：</Col>
+                <Col style={{ minWidth: '100px' }}>任务修改时间：</Col>
                 <Col>{moment(taskDetail?.updateTime).format('YYYY-MM-DD HH:mm:ss')}</Col>
             </Row>
             <Col style={{ position: 'absolute', top: 35, right: 0, transform: 'rotate(45deg)' }}><StatusIcon status={taskDetail?.calculationStatus} /></Col>
@@ -196,7 +196,7 @@ export default function TaskCard(props: IProps) {
                             transform: 'rotate(60deg)',
                             transition: 'all .5s ease'
                         }} />
-                        <Checkbox style={{ position: 'absolute', bottom: 13, right: 10, }} checked={isSelect} onChange={selectChange}>
+                        <Checkbox style={{ position: 'absolute', bottom: 10, right: 10, }} checked={isSelect} onChange={selectChange}>
                             <span style={{ color: isSelect ? '#141414' : 'rgba(0, 0, 0, 0.45)' }}>选择</span>
                         </Checkbox>
                     </>

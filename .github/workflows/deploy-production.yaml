@@ -17,8 +17,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # 确保获取所有历史以便正确生成标签
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }} 
-
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Setup Git
         run: |
@@ -29,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Create and Push Tag
         env:
@@ -108,14 +107,17 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: checkout tag
         run: git checkout ${{ needs.create-tag.outputs.TAG }}
 
       - name: Install Dependencies
         run: yarn
-      
+
+      - name: Lint
+        run: yarn lint
+
       - name: Build
         id: build-environment
         run: |
@@ -138,15 +140,8 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
-          branch: gh-pages     # 部署到 gh-pages 分支
+          branch: gh-pages # 部署到 gh-pages 分支
           folder: ${{ env.OUT_DIR }} # 部署目录见配置
           target-folder: / # 部署根目录
-          clean: true     # 先清理之前的部署
+          clean: true # 先清理之前的部署
           token: ${{ secrets.GITHUB_TOKEN }}
-
-    
-
-
-
-
-      

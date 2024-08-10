@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Card, Divider, Form, Input, message, Radio, Segmented, Space, Typography } from 'antd';
 import UploadFile from "./upload-file";
-import { SOFTERWARE_TYPE, TASK_CALCULATION_STATUS, CASTEP_FILETYPE } from '../../../constants';
+import { SOFTERWARE_TYPE, TASK_CALCULATION_STATUS, CASTEP_FILETYPE, CALCULATION_SERVICE } from '../../../constants';
 import { getCellInfo } from '@/packages/castep/formatter/get-cell-info'
 import type { ReturnCellInfo } from '@/packages/castep/formatter/get-cell-info';
 
@@ -12,10 +12,10 @@ import { nanoid } from 'nanoid';
 import { useRecoilValue } from 'recoil';
 import {
     taskDataState,
+    projectDetailState,
     createOrModifiedDataState,
 } from '../constants/atoms';
 
-import { projectDetailState } from '../constants/atoms';
 
 import decimal from 'decimal.js';
 
@@ -29,7 +29,14 @@ const INITIAL_VALUE = {
     isFixed: false
 };
 
-function judgeIsFitProjectSetting(projectDetail: ProjectListType[number] | null, cellInfo: ReturnCellInfo) {
+function judgeIsFitProjectSetting(props: {
+    projectDetail: ProjectListType[number] | null;
+    cellInfo: ReturnCellInfo;
+    heavyFile: { text: string };
+    lightFile: { text: string };
+}) {
+    const { projectDetail, cellInfo, heavyFile, lightFile } = props;
+
     const project_isotope = projectDetail?.calculationElement;
     const project_massSetting = projectDetail?.isotopeMass;
 
@@ -48,6 +55,18 @@ function judgeIsFitProjectSetting(projectDetail: ProjectListType[number] | null,
     if (!heavy_mass_isEqual || !light_mass_isEqual) return {
         isFit: false,
         reason: '解析文件的同位素质量数与工程选择不一致，请检查后重新上传～'
+    };
+
+    const isPhonon_heavy = judgeIsCalculatePhonon(heavyFile?.text || '');
+    const isPhonon_light = judgeIsCalculatePhonon(lightFile?.text || '');
+    if (isPhonon_heavy !== isPhonon_light) return {
+        isFit: false,
+        reason: '轻、重同位素 .castep 文件计算设置不一致，请检查后重新上传～'
+    };
+    const isAllowPhonon = projectDetail?.calculationService?.includes(CALCULATION_SERVICE.PHONON);
+    if (isPhonon_light && !isAllowPhonon) return {
+        isFit: false,
+        reason: '工程计算服务未勾选声子频率，请修改工程设置或者重新上传～'
     };
 
     return {
@@ -161,11 +180,15 @@ export default function FileUpload(props: IProps) {
                 isFixed,
             });
             //检查上传文件信息是否与工程那个设定一致
-            const { isFit, reason } = judgeIsFitProjectSetting(projectDetail, cellInfo);
+            const { isFit, reason } = judgeIsFitProjectSetting({ projectDetail, cellInfo, heavyFile, lightFile });
             if (!isFit) throw new Error(reason);
             const isPhonon_heavy = judgeIsCalculatePhonon(heavyFile?.text || '');
             const isPhonon_light = judgeIsCalculatePhonon(lightFile?.text || '');
             if (isPhonon_heavy !== isPhonon_light) throw new Error('轻、重同位素 .castep 文件计算设置不一致，请仔细检查文件');
+            /**
+             * 这里后续补齐，去掉这个校验
+             */
+            if (isPhonon_heavy) throw new Error('暂不支持计算声子频率，敬请期待～');
             //计算任务名字
             const name = form.getFieldValue('taskName') || '';
             const taskId = isEdit ? editTaskId : nanoid();

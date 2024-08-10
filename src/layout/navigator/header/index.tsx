@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Avatar, Space, Row, Col, Typography, Dropdown, Button, message } from 'antd';
 import {
     MenuFoldOutlined,
@@ -8,6 +8,7 @@ import {
     SyncOutlined,
 } from '@ant-design/icons';
 import LogoSrc from 'public/square-pants-logo.svg';
+import useWatchSystemTheme from '@/hooks/use-watch-system-theme';
 // import Logo from './components/logo';
 
 
@@ -29,7 +30,7 @@ const items = [
     {
         key: 'change',
         label: (
-            <a href="#"  onClick={(e) => {
+            <a href="#" onClick={(e) => {
                 e.preventDefault();
                 message.warning('功能开发中，敬请期待～')
             }}>
@@ -50,7 +51,12 @@ interface IProps {
 
 export default function Header(props: IProps) {
     const { collapsed, setCollapsed, isLargerThanMinWidth } = props;
+    const theme = useWatchSystemTheme();
     const [isHovered, setIsHovered] = useState(false);
+    const [bgcColor, setBgcColor] = useState({
+        hovered: '#F5F5F5',
+        notHovered: '#fff',
+    })
     const handleMouseEnter = () => {
         setIsHovered(true);
     };
@@ -58,6 +64,21 @@ export default function Header(props: IProps) {
     const handleMouseLeave = () => {
         setIsHovered(false);
     };
+
+    /**根据系统色设置背景色，兼容写法，后续更改 */
+    useEffect(() => {
+        if (theme === 'dark') {
+            setBgcColor({
+                hovered: '#0d1116',
+                notHovered: '#000',
+            })
+        } else {
+            setBgcColor({
+                hovered: '#F5F5F5',
+                notHovered: '#fff',
+            })
+        }
+    }, [theme]);
 
     return (
         <>
@@ -88,11 +109,16 @@ export default function Header(props: IProps) {
                     <Space>
                         {/* 补充多页面链接 */}
                         <Dropdown menu={{ items }}>
-                            <Space onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} style={{ height: '45px', borderRadius: '8px', padding: '0 8px', backgroundColor: isHovered ? '#F5F5F5' : '#fff' }}>
+                            <Space onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} style={{
+                                height: '45px',
+                                borderRadius: '8px',
+                                padding: '0 8px',
+                                backgroundColor: isHovered ? bgcColor.hovered : bgcColor.notHovered,
+                            }}>
                                 <Avatar size={30}>
                                     <UserOutlined />
                                 </Avatar>
-                                <Typography.Text type='secondary' ellipsis style={{ fontSize: 15,lineHeight: '60px', fontWeight: 400 }}>admin</Typography.Text>
+                                <Typography.Text type='secondary' ellipsis style={{ fontSize: 15, lineHeight: '60px', fontWeight: 400 }}>admin</Typography.Text>
                             </Space>
                         </Dropdown>
                     </Space>

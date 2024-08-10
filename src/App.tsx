@@ -7,6 +7,7 @@ import zhCN from "antd/es/locale/zh_CN";
 import useWatchSystemTheme from "./hooks/use-watch-system-theme.ts";
 import { QueryParamProvider } from "use-query-params";
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
+import useTriggerSlider from "./hooks/use-trigger-slider.ts";
 
 // import { QueryParamProvider } from "use-query-params";
 
@@ -24,6 +25,7 @@ function App() {
   // const { history } = props;
 
   const systemTheme = useWatchSystemTheme();
+  const { isLargerThanMinWidth } = useTriggerSlider();
 
   return (
     <ConfigProvider
@@ -41,7 +43,7 @@ function App() {
         },
         algorithm: systemTheme === 'light' ? [theme.defaultAlgorithm] : [theme.darkAlgorithm],
       }}
-    // componentSize={true ? 'large' : 'middle'}
+      componentSize={isLargerThanMinWidth ? 'middle' : 'large'}
     >
       <Router>
         <QueryParamProvider adapter={ReactRouter6Adapter}>

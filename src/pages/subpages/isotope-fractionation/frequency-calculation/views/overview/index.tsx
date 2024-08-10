@@ -125,7 +125,7 @@ export default function FrequencyCalculation() {
           <ProjectForm form={form} required singleFormItem={!md} />
         </Spin>
       </Drawer>
-      <FloatButton.BackTop visibilityHeight={100} type="primary" style={{ marginBottom: 80 }} />
+      <FloatButton.BackTop visibilityHeight={200} type="primary" style={{ marginBottom: 80 }} />
     </>
   );
 }

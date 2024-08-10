@@ -5,6 +5,7 @@ import { omitBy, orderBy, isEqual, isEmpty } from 'lodash';
 import { findLeafValue, recoverCascaderValue, getAllAbledLeafValue } from './utils';
 
 import type { CascaderProProps } from './models';
+import useWatchSystemTheme from '@/hooks/use-watch-system-theme';
 
 const excludesProps = ['value', 'onChange', 'options'];
 
@@ -16,6 +17,8 @@ const excludesProps = ['value', 'onChange', 'options'];
  */
 export default function CascaderPro(props: CascaderProProps) {
     const { value, onChange, options } = props;
+
+    const theme = useWatchSystemTheme();
 
     const [isSelectAll, setIsSelectAll] = useState(false);
 
@@ -51,7 +54,7 @@ export default function CascaderPro(props: CascaderProProps) {
             <div style={{ paddingBottom: 36, maxHeight: 200, overflow: 'scroll' }}>
                 {menus}
             </div>
-            <div style={{ position: 'absolute', bottom: 0, width: '100%', backgroundColor: '#fff' }}>
+            <div style={{ position: 'absolute', bottom: 0, width: '100%', backgroundColor: theme === 'light' ? '#fff' : 'rgba(255, 255, 255, 0.12)' }}>
                 <Divider style={{ margin: '0px' }} />
                 <div style={{ margin: '6px 0 6px 16px' }}>
                     <Checkbox checked={isSelectAll} onChange={selectAllOnChange} indeterminate={indeterminate}>全选</Checkbox>

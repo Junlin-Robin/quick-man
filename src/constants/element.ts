@@ -755,7 +755,7 @@ export const Elements = [
                     abundance: '0',
                     type: ISOTOPE_TYPE.RADIOACTIVE,
                 }, {
-                    mass: '10.905295',
+                    mass: '110.905295',
                     abundance: '0',
                     type: ISOTOPE_TYPE.RADIOACTIVE,
                 }
