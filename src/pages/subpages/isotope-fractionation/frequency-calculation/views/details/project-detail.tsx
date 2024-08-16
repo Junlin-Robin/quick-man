@@ -154,7 +154,7 @@ export default function ProjectDetail(props: { id: string }) {
     <>
       <Space direction="vertical" style={{ width: '100%' }}>
         <PageHeader
-          title={[(<Link to="/calculation/qm/isotope-fractionation/frequency">频率分馏计算</Link>), '工程详情']}
+          title={[(<Link to="/calculation/qm/isotope-fractionation/frequency" style={{ fontSize: '16px' }}>频率分馏计算</Link>), <span style={{ fontSize: '16px' }}>工程详情</span>]}
           extra={<Button type='link' onClick={openTaskListDrawer}>任务列表</Button>}
         />
         <Card title="计算设置" extra={

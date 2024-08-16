@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import {
     Card, Typography, Button, Row, Col, Tag, Tooltip, message, Checkbox, Space,
+    Modal,
 } from 'antd';
 import {
     ClockCircleOutlined, CheckCircleOutlined, SyncOutlined, CloseCircleOutlined,
@@ -105,7 +106,6 @@ export default function TaskCard(props: IProps) {
 
 
     return (
-        // <Badge.Ribbon text={<Checkbox>选择</Checkbox>} style={{display: isAction ? 'block' : 'none'}} color='orange'>
         <Card
             title={
                 <>
@@ -131,10 +131,17 @@ export default function TaskCard(props: IProps) {
                     </Col>
                     <Col>
                         <Button type="link" danger style={{ paddingRight: 0 }} onClick={() => {
-                            const isSuccess = deleteData?.(taskDetail?.id);
-                            if (!isSuccess) message.error('删除任务失败！');
-                            else message.success('删除任务成功！');
-                            triggerGetData?.();
+                            Modal.confirm({
+                                title: '确认',
+                                content: `确认删除 ${taskDetail?.name || ''} 计算任务？`,
+                                onOk: () => {
+                                    const isSuccess = deleteData?.(taskDetail?.id);
+                                    if (!isSuccess) message.error('删除任务失败！');
+                                    else message.success('删除任务成功！');
+                                    triggerGetData?.();
+                                },
+                                centered: true,
+                            });
                         }}>删除</Button>
                     </Col>
                 </Row>
@@ -153,8 +160,8 @@ export default function TaskCard(props: IProps) {
             <Row wrap={false}>
                 <Col style={{ minWidth: '100px' }}>同位素质量：</Col>
                 <Col>
-                    <Tag color="#13c2c2">轻：{new decimal(taskDetail?.calculationParams.cellInfo.isotopeSetting.massSetting.light || 0).toFixed(2).toString()}</Tag>
-                    <Tag color="#722ed1">重：{new decimal(taskDetail?.calculationParams.cellInfo.isotopeSetting.massSetting.heavy || 0).toFixed(2).toString()}</Tag>
+                    <Tag color="cyan">轻：{new decimal(taskDetail?.calculationParams.cellInfo.isotopeSetting.massSetting.light || 0).toFixed(2).toString()}</Tag>
+                    <Tag color="cyan">重：{new decimal(taskDetail?.calculationParams.cellInfo.isotopeSetting.massSetting.heavy || 0).toFixed(2).toString()}</Tag>
                 </Col>
             </Row>
             <Row wrap={false}>
@@ -197,12 +204,11 @@ export default function TaskCard(props: IProps) {
                             transition: 'all .5s ease'
                         }} />
                         <Checkbox style={{ position: 'absolute', bottom: 10, right: 10, }} checked={isSelect} onChange={selectChange}>
-                            <span style={{ color: isSelect ? '#141414' : 'rgba(0, 0, 0, 0.45)' }}>选择</span>
+                            <Typography.Text type={isSelect ? undefined : 'secondary'}>选择</Typography.Text>
                         </Checkbox>
                     </>
                 ) : null
             }
         </Card>
-        // </Badge.Ribbon>
     );
 }

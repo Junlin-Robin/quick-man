@@ -69,10 +69,17 @@ export default function UploadDrawer(props: IProps) {
 
     const batchDelectTasks = useMemoizedFn(() => {
         if (isEmpty(actionSelectList) || !actionSelectList) return;
-        const isSuccess = deleteData?.(actionSelectList);
-        if (!isSuccess) message.error('删除任务失败！');
-        else message.success('删除任务成功！');
-        triggerGetData?.();
+        Modal.confirm({
+            title: '确认',
+            content: '确认删除选择的计算任务？',
+            onOk: () => {
+                const isSuccess = deleteData?.(actionSelectList);
+                if (!isSuccess) message.error('删除任务失败！');
+                else message.success('删除任务成功！');
+                triggerGetData?.();
+            },
+            centered: true,
+        })
     });
 
     const handleClose = useMemoizedFn(() => {
@@ -105,6 +112,19 @@ export default function UploadDrawer(props: IProps) {
 
         }
     }, [actionSelectList, data]);
+
+    useEffect(() => {
+        if (visible) {
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = '';
+        }
+    
+        // 清理函数，确保在组件卸载时恢复滚动
+        return () => {
+          document.body.style.overflow = '';
+        };
+      }, [visible]);
 
 
     return (
@@ -139,7 +159,7 @@ export default function UploadDrawer(props: IProps) {
                             isAction ? (
                                 <Space align="center">
                                     <Checkbox checked={isSelectAll} onChange={selectChange} indeterminate={indeterminate}>全选</Checkbox>
-                                    <Button type="link" style={{ padding: 0 }} onClick={batchDelectTasks}>删除</Button>
+                                    <Button type="link" style={{ padding: 0 }} onClick={batchDelectTasks} disabled={isEmpty(actionSelectList) || !actionSelectList}>删除</Button>
                                     <Button type="link" onClick={() => { setIsAction(false); setActionSelectList([]); setIsSelectAll(false); }} style={{ padding: 0 }}>取消</Button>
                                 </Space>
                             ) : (<Button type="link" onClick={() => setIsAction(true)}>批量删除</Button>)
@@ -180,7 +200,7 @@ export default function UploadDrawer(props: IProps) {
                     </Tooltip>
                 </Spin>
             </Drawer>
-            <Modal open={open} footer={null} getContainer={() => document.getElementsByClassName('ant-drawer-body')?.[0] as HTMLElement} closeIcon={null} destroyOnClose>
+            <Modal open={open} footer={null} getContainer={() => document.getElementsByClassName('ant-drawer-body')?.[0] as HTMLElement} closeIcon={null} destroyOnClose centered>
                 <FileUpload taskId={taskId} close={closeModal} isEdit={isEdit} />
             </Modal>
         </>

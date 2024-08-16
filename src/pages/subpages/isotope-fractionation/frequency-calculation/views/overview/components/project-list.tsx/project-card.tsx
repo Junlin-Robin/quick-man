@@ -74,7 +74,9 @@ const ProjectCard = (props: Props) => {
                 </Row>
                 <Row wrap={false}>
                     <Col style={{ minWidth: '80px' }}>详细信息：</Col>
-                    <Col style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} flex={1}>{projectDescription || '-'}</Col>
+                    <Tooltip title={projectDescription || ''}>
+                        <Col style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} flex={1}>{projectDescription || '-'}</Col>
+                    </Tooltip>
                 </Row>
             </Space>
         )

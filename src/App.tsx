@@ -1,13 +1,16 @@
-import { Suspense } from "react";
+import { Suspense, useRef } from "react";
 import { Navigate, HashRouter as Router, Route, Routes } from "react-router-dom";
 import routers from "./routers";
-import { Spin, Result, ConfigProvider, theme } from "antd";
+import { Spin, Result, ConfigProvider, theme, Modal } from "antd";
 import PageLayout from "./layout";
 import zhCN from "antd/es/locale/zh_CN";
 import useWatchSystemTheme from "./hooks/use-watch-system-theme.ts";
 import { QueryParamProvider } from "use-query-params";
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import useTriggerSlider from "./hooks/use-trigger-slider.ts";
+import { getBrowserUserAgent } from './utils/get-browser-version.ts';
+import { useMount } from "ahooks";
+
 
 // import { QueryParamProvider } from "use-query-params";
 
@@ -26,6 +29,22 @@ function App() {
 
   const systemTheme = useWatchSystemTheme();
   const { isLargerThanMinWidth } = useTriggerSlider();
+
+  const { isIE, isMobile } = getBrowserUserAgent();
+
+  const modalRef = useRef<ReturnType<typeof Modal.warning> | null>(null);
+
+  useMount(() => {
+    if (isIE && !modalRef.current) modalRef.current = Modal.warning({
+      title: '浏览器版本过低',
+      content: '您正在使用IE浏览器，为了更好的体验效果，请切换至Chrome浏览器',
+    });
+    if (isMobile && !modalRef.current) modalRef.current = Modal.warning({
+      title: '移动端浏览',
+      content: '您正在使用手机浏览网页，为了更好的体验效果，请移步电脑进行造作',
+      centered: true,
+    });
+  });
 
   return (
     <ConfigProvider

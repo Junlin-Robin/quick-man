@@ -14,7 +14,7 @@ export default function Cover(props: { element: string }) {
             backgroundPosition: 'center',
             backgroundSize: 'cover',
             position: 'relative',
-            height: '220px',
+            height: '260px',
         }}>
             <div style={{
                 position: 'absolute',

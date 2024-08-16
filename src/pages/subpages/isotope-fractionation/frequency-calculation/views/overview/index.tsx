@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMount, useMemoizedFn } from 'ahooks';
 import {
   Empty, Alert, Typography, Row, Col, Button, Input, Space, Drawer, Grid, Form, message, Spin, FloatButton,
@@ -75,6 +75,19 @@ export default function FrequencyCalculation() {
   ));
 
   const { md } = useBreakpoint();
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    // 清理函数，确保在组件卸载时恢复滚动
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
   return (
     <>
       <PageHeader title="频率分馏计算" />

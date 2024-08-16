@@ -84,7 +84,7 @@ export default function ProjectForm(props: IProps) {
           </Col>
           <Col span={singleFormItem ? 24 : 12}>
             <Form.Item label="计算服务" name="calculationService" rules={[...get(rules, 'calculationService') || [], { required, message: '计算服务不允许为空' }]} extra="建议全选">
-              <CascaderPro options={CalculationServiesOptions} showCheckedStrategy="SHOW_CHILD" placeholder="请选择计算服务" allowClear showSearch />
+              <CascaderPro options={CalculationServiesOptions} showCheckedStrategy="SHOW_CHILD" placeholder="请选择计算服务" allowClear />
             </Form.Item>
           </Col>
           <Col span={singleFormItem ? 24 : 12}>
