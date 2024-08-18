@@ -151,7 +151,7 @@ export default function FrequencyPlotCard(props: IProps) {
                     type: "text",
                     data: [lineData[1]?.fractionation, lineData[1]?.forceConstant],
                     encode: { text: `y = ${regress?.m}x + ${regress?.b}\nR² = ${regress?.r2}` },
-                    style: { textAlign: "center", dy: 70, dx: -20 },
+                    style: { fill: theme === 'dark' ? '#fff' : '#000', textAlign: "center", dy: 70, dx: -20 },
                     tooltip: false,
                 }
             ],

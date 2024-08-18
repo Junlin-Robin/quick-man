@@ -22,7 +22,6 @@ export default function useCalculateTasks(key: string) {
     const calculateWorker = new Worker(new URL('../worker/calculate.ts', import.meta.url), { type: 'module' });
 
     async function calculateAndSaveFrequency(taskIdList: string[], isSetCalculationResults: boolean = true): Promise<boolean> {
-        console.log('done节点上了')
         /**没有传计算任务id，则直接设置空数组 */
         if (isNil(taskIdList) || isEmpty(taskIdList)) {
             setCalculationResults([]);
@@ -40,7 +39,6 @@ export default function useCalculateTasks(key: string) {
         } catch (error) {
             message.error((error as Error).message)
             return false;
-            // rej(error);
         }
 
         setLoading(true);
