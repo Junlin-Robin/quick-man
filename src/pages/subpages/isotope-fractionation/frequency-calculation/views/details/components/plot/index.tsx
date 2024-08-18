@@ -49,7 +49,14 @@ export default function FrequencyPlotCard(props: IProps) {
         xField: 'temperature',
         yField: 'fractionation',
         nameField: 'name',
-        axis: { x: { title: ('10^6/T^2'), titleSpacing: 10, gridStrokeOpacity: 0.25 }, y: { title: '1000lnβ（‰）', titleSpacing: 10, gridStrokeOpacity: 0.25 } }, //轴标题
+        axis: {
+            x: {
+                title: ('10⁶/T²（K⁻²）'), titleSpacing: 10, gridStrokeOpacity: 0.25
+            }, 
+            y: {
+                title: '1000lnβ（‰）', titleSpacing: 10, gridStrokeOpacity: 0.25
+            },
+        }, //轴标题
         seriesField: 'name',
         colorField: 'name',
         slider: isLargerThanMinWidth ? {
@@ -78,12 +85,12 @@ export default function FrequencyPlotCard(props: IProps) {
                 forceConstant: number;
                 fractionation: number;
             }[];
-            const spotData = forceConstantData.map((item) => [item.fractionation, item.forceConstant]);
+            const spotData = forceConstantData.map((item) => [item.forceConstant, item.fractionation]);
             const { m, b } = linearRegression(spotData);
             const r2 = rSquared(spotData, linearRegressionLine({ m, b }));
-            setRegres({ m: parseFloat(new decimal(m).toFixed(4)), b, r2: parseFloat(new decimal(r2).toFixed(4)) });
-            const minFractionation = decimal.min(...forceConstantData.map((item) => item.fractionation));
-            const maxFractionation = decimal.max(...forceConstantData.map((item) => item.fractionation));
+            setRegres({ m: parseFloat(new decimal(m).toFixed(4)), b: parseFloat(new decimal(m).toFixed(4)), r2: parseFloat(new decimal(r2).toFixed(4)) });
+            const minFractionation = decimal.min(...forceConstantData.map((item) => item.forceConstant));
+            const maxFractionation = decimal.max(...forceConstantData.map((item) => item.forceConstant));
             const resLineData = [
                 {
                     fractionation: decimal.floor(minFractionation).toNumber(),
@@ -102,20 +109,20 @@ export default function FrequencyPlotCard(props: IProps) {
 
     const scatterConfig = {
         data: formattered,
-        xField: 'fractionation',
-        yField: 'forceConstant',
+        xField: 'forceConstant',
+        yField: 'fractionation',
         slider: isLargerThanMinWidth ? {
             x: true,
             y: true,
         } : undefined,
         theme,
-        axis: { x: { title: ('1000lnβ（‰）'), titleSpacing: 10, gridStrokeOpacity: 0.25 }, y: { title: 'Force Constant(N/m2)', titleSpacing: 10, gridStrokeOpacity: 0.25 } }, //轴标题
+        axis: { x: { title: 'Force Constant <F> (N/m)', titleSpacing: 10, gridStrokeOpacity: 0.25 }, y: { title: '1000lnβ（‰）', titleSpacing: 10, gridStrokeOpacity: 0.25 } }, //轴标题
         seriesField: 'name',
         colorField: 'name',
         shapeField: 'point',
         tooltip: {
             title: (text: ForceConstantData) => `${text.name} `,
-            items: [(text: ForceConstantData) => `1000lnβ：${text.fractionation}（‰）`, (text: ForceConstantData) => `力常数：${text.forceConstant}（N/m^2）`],
+            items: [(text: ForceConstantData) => `1000lnβ：${text.fractionation}（‰）`, (text: ForceConstantData) => `力常数：${text.forceConstant}（N/m）`],
         },
         label: {
             text: 'name',
@@ -143,7 +150,7 @@ export default function FrequencyPlotCard(props: IProps) {
                 {
                     type: "text",
                     data: [lineData[1]?.fractionation, lineData[1]?.forceConstant],
-                    encode: { text: `K = ${regress?.m}\nR² = ${regress?.r2}` },
+                    encode: { text: `y = ${regress?.m}x + ${regress?.b}\nR² = ${regress?.r2}` },
                     style: { textAlign: "center", dy: 70, dx: -20 },
                     tooltip: false,
                 }

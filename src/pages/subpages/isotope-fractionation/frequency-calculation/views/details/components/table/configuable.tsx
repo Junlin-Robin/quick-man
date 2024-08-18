@@ -55,7 +55,7 @@ export const useColumns: (type: CALCULATION_SERVICE) => ColumnsType<TableRecord>
         ...(
             type === CALCULATION_SERVICE.FORCE_CONSTANT ? ([
                 {
-                    title: '力常数',
+                    title: '力常数（N/m）',
                     width: 150,
                     dataIndex: 'forceConstant',
                 }
