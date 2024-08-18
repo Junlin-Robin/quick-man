@@ -115,16 +115,16 @@ export default function UploadDrawer(props: IProps) {
 
     useEffect(() => {
         if (visible) {
-          document.body.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden';
         } else {
-          document.body.style.overflow = '';
+            document.body.style.overflow = '';
         }
-    
+
         // 清理函数，确保在组件卸载时恢复滚动
         return () => {
-          document.body.style.overflow = '';
+            document.body.style.overflow = '';
         };
-      }, [visible]);
+    }, [visible]);
 
 
     return (
@@ -136,7 +136,7 @@ export default function UploadDrawer(props: IProps) {
                 open={visible}
                 onClose={handleClose}
                 placement={md ? 'right' : 'bottom'}
-                height="85vh"
+                height="70vh"
                 maskClosable={false}
                 extra={(
                     <>
@@ -170,8 +170,8 @@ export default function UploadDrawer(props: IProps) {
                         </Button>
                     </Row>
                 }>
+                <Input.Search placeholder="请输入计算任务名进行搜索" allowClear onSearch={handleSearch} style={{ marginTop: -12 }} />
                 <Spin spinning={loading} style={{ marginTop: 60 }}>
-                    <Input.Search placeholder="请输入查询的任务名进行搜索" allowClear onSearch={handleSearch} style={{ marginTop: -12 }} />
                     {
                         data && data?.length ? (
                             <Space direction="vertical" style={{ width: '100%' }}>
@@ -196,7 +196,7 @@ export default function UploadDrawer(props: IProps) {
                         ) : (<Empty style={{ marginTop: 100 }} />)
                     }
                     <Tooltip title="回到顶部">
-                        <FloatButton.BackTop target={() => document.getElementsByClassName('ant-drawer-body')?.[0] as HTMLElement} visibilityHeight={50} style={{ marginBottom: 20 }} />
+                        <FloatButton.BackTop target={() => document.getElementsByClassName('ant-drawer-body')?.[0] as HTMLElement} visibilityHeight={180} style={{ marginBottom: 20 }} />
                     </Tooltip>
                 </Spin>
             </Drawer>

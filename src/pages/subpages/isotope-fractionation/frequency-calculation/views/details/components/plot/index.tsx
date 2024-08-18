@@ -1,5 +1,5 @@
-import { useMemo, useRef } from 'react';
-import { Button, Card, Empty, Spin, Typography } from 'antd';
+import { useMemo, useRef, useState } from 'react';
+import { Button, Card, Empty, InputNumber, Space, Spin, Typography } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import { useMemoizedFn } from 'ahooks';
 import { Line, Scatter } from '@ant-design/charts';
@@ -15,6 +15,9 @@ import type { IsotopeFractionationData, ForceConstantData } from './models';
 import useWatchSystemTheme from '@/hooks/use-watch-system-theme';
 import useTriggerSlider from '@/hooks/use-trigger-slider';
 
+import { linearRegression, linearRegressionLine, rSquared } from 'simple-statistics';
+
+import decimal from 'decimal.js';
 
 interface IProps {
     dataSource: CalculationResults;
@@ -35,12 +38,18 @@ export default function FrequencyPlotCard(props: IProps) {
 
     const formattered = useMemo(() => formatterData(dataSource, type), [type, dataSource]);
 
+    const [regress, setRegres] = useState<{
+        m: number;
+        b: number;
+        r2: number;
+    } | null>(null);
+
     const lineConfig = {
         data: formattered,
         xField: 'temperature',
         yField: 'fractionation',
         nameField: 'name',
-        axis: { x: { title: '123', size: 40 }, y: { title: '345', size: 50 } }, //轴标题
+        axis: { x: { title: ('10^6/T^2'), titleSpacing: 10, gridStrokeOpacity: 0.25 }, y: { title: '1000lnβ（‰）', titleSpacing: 10, gridStrokeOpacity: 0.25 } }, //轴标题
         seriesField: 'name',
         colorField: 'name',
         slider: isLargerThanMinWidth ? {
@@ -52,14 +61,44 @@ export default function FrequencyPlotCard(props: IProps) {
             items: [(text: IsotopeFractionationData) => `1000lnβ：${text.fractionation}（‰）`],
         },
         theme,
-        annotations: {
-            style: {
-                stroke: 'red',
-                lineWidth: 2, // 辅助线宽度
-                lineDash: [4, 4], // 虚线样式
-            }
-        }
+        scale: {
+            x: { nice: true, domain: [0, 14], tickCount: 14 },
+            y: { nice: true },
+        },
+        interaction: { brushFilter: true },
+        sizeField: 2,
     };
+
+    //力常数拟合曲线
+    const lineData = useMemo(() => {
+        if (type === CALCULATION_SERVICE.FORCE_CONSTANT && !isEmpty(formattered)) {
+            const forceConstantData = formattered as {
+                category: string;
+                name: string;
+                forceConstant: number;
+                fractionation: number;
+            }[];
+            const spotData = forceConstantData.map((item) => [item.fractionation, item.forceConstant]);
+            const { m, b } = linearRegression(spotData);
+            const r2 = rSquared(spotData, linearRegressionLine({ m, b }));
+            setRegres({ m: parseFloat(new decimal(m).toFixed(4)), b, r2: parseFloat(new decimal(r2).toFixed(4)) });
+            const minFractionation = decimal.min(...forceConstantData.map((item) => item.fractionation));
+            const maxFractionation = decimal.max(...forceConstantData.map((item) => item.fractionation));
+            const resLineData = [
+                {
+                    fractionation: decimal.floor(minFractionation).toNumber(),
+                    forceConstant: decimal.floor(minFractionation).mul(m).add(b).toNumber(),
+                }, {
+                    fractionation: decimal.ceil(maxFractionation).toNumber(),
+                    forceConstant: decimal.ceil(maxFractionation).mul(m).add(b).toNumber(),
+                }
+            ];
+            return resLineData;
+        } else {
+            return [];
+        }
+    }, [formattered, type]);
+
 
     const scatterConfig = {
         data: formattered,
@@ -70,14 +109,48 @@ export default function FrequencyPlotCard(props: IProps) {
             y: true,
         } : undefined,
         theme,
-        // axis: { x: { title: false, size: 40 }, y: { title: false, size: 50 } },
+        axis: { x: { title: ('1000lnβ（‰）'), titleSpacing: 10, gridStrokeOpacity: 0.25 }, y: { title: 'Force Constant(N/m2)', titleSpacing: 10, gridStrokeOpacity: 0.25 } }, //轴标题
         seriesField: 'name',
         colorField: 'name',
+        shapeField: 'point',
         tooltip: {
             title: (text: ForceConstantData) => `${text.name} `,
             items: [(text: ForceConstantData) => `1000lnβ：${text.fractionation}（‰）`, (text: ForceConstantData) => `力常数：${text.forceConstant}（N/m^2）`],
         },
-
+        label: {
+            text: 'name',
+            transform: [{ type: 'overlapDodgeY' }],
+            style: {
+                textAlign: 'start',
+                textBaseline: 'middle',
+                dx: 15,
+                position: 'left',
+                fontSize: 10,
+            },
+        },
+        sizeField: 6,
+        scale: {
+            x: { nice: true },
+            y: { nice: true },
+        },
+        line: {
+            data: lineData,
+            xField: 'fractionation',
+            yField: 'forceConstant',
+            style: { stroke: "red", lineWidth: 2, lineDash: [5, 10], opacity: 0.8, shadowBlur: 5 },
+            tooltip: false,
+            annotations: [
+                {
+                    type: "text",
+                    data: [lineData[1]?.fractionation, lineData[1]?.forceConstant],
+                    encode: { text: `K = ${regress?.m}\nR² = ${regress?.r2}` },
+                    style: { textAlign: "center", dy: 70, dx: -20 },
+                    tooltip: false,
+                }
+            ],
+        },
+        interaction: { brushFilter: true },
+        style: { fillOpacity: 0.3, lineWidth: 1 },
     };
 
 

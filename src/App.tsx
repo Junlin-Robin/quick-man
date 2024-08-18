@@ -37,12 +37,17 @@ function App() {
   useMount(() => {
     if (isIE && !modalRef.current) modalRef.current = Modal.warning({
       title: '浏览器版本过低',
-      content: '您正在使用IE浏览器，为了更好的体验效果，请切换至Chrome浏览器',
+      content: '检测到您正在使用IE浏览器，为了更好的体验效果，请切换至Chrome浏览器',
+      centered: true,
+      autoFocusButton: null,
+      width: 360
     });
     if (isMobile && !modalRef.current) modalRef.current = Modal.warning({
       title: '移动端浏览',
-      content: '您正在使用手机浏览网页，为了更好的体验效果，请移步电脑进行造作',
+      content: '检测到您正在使用手机浏览网页，部分功能将被禁用，为了更好的体验效果，请移步电脑登陆网页进行操作',
       centered: true,
+      autoFocusButton: null,
+      width: 360
     });
   });
 

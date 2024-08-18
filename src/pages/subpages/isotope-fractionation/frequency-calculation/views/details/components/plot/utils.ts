@@ -27,8 +27,8 @@ export function formatterData(dataSource: CalculationResults, type: CALCULATION_
                 temperature: 0,
                 category: dataItem.taskId,
                 name: dataItem.taskName,
-                kelvin: '0',
-                celsius: '-273.15',
+                kelvin: '-',
+                celsius: '-',
             });
         });
         return fractionationData;

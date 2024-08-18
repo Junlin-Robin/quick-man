@@ -18,6 +18,21 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     build: {
       outDir: `${env.REACT_BUILD_OUT_DIR}/${suffixURL}`,
+      // rollupOptions: {
+      //   output: {
+      //     manualChunks: (id) => {
+      //       if (id.includes('node_modules')) {
+      //         if (id.includes('react')) {
+      //           return 'react';
+      //         }
+      //         if (id.includes('lodash')) {
+      //           return 'lodash';
+      //         }
+      //         // 你可以根据需要添加更多的包
+      //       }
+      //     },
+      //   },
+      // },
     },
     base: baseURL,
     resolve: {

@@ -17,10 +17,10 @@ import {
 } from '../constants/atoms';
 
 import moment from 'moment';
-import decimal from 'decimal.js';
 
 import type { CheckboxProps } from 'antd';
 import { isEmpty } from 'lodash';
+import useWatchSystemTheme from '@/hooks/use-watch-system-theme';
 
 const enum FileType {
     LIGHT = 'light',
@@ -76,6 +76,8 @@ export default function TaskCard(props: IProps) {
     const deleteData = useRecoilValue(deleteDataState);
     const triggerGetData = useRecoilValue(triggerGetDataState);
 
+    const theme = useWatchSystemTheme();
+
     const selectChange: CheckboxProps['onChange'] = (e) => {
         const isSelected = e.target.checked || false;
         // setIsSelect(isSelected);
@@ -111,7 +113,7 @@ export default function TaskCard(props: IProps) {
                 <>
                     <Row>
                         <Tooltip title={taskDetail?.name} placement='top'>
-                            <Col style={{ textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: 180 }}>{taskDetail?.name}</Col>
+                            <Col style={{ textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: 180 }}>{taskDetail?.name || '-'}</Col>
                         </Tooltip>
                     </Row>
                     <Row>
@@ -153,20 +155,22 @@ export default function TaskCard(props: IProps) {
                 }
             }}
         >
-            <Row wrap={false}>
-                <Col style={{ minWidth: '100px' }}>同位素：</Col>
-                <Col>{taskDetail?.calculationParams?.cellInfo?.isotopeSetting?.isotope}</Col>
-            </Row>
-            <Row wrap={false}>
-                <Col style={{ minWidth: '100px' }}>同位素质量：</Col>
+            <Row wrap={false} style={{ marginBottom: 3 }}>
+                <Col style={{ minWidth: '100px' }}>计算任务状态：</Col>
                 <Col>
-                    <Tag color="cyan">轻：{new decimal(taskDetail?.calculationParams.cellInfo.isotopeSetting.massSetting.light || 0).toFixed(2).toString()}</Tag>
-                    <Tag color="cyan">重：{new decimal(taskDetail?.calculationParams.cellInfo.isotopeSetting.massSetting.heavy || 0).toFixed(2).toString()}</Tag>
+                    <StatusIcon status={taskDetail?.calculationStatus} />
                 </Col>
             </Row>
-            <Row wrap={false}>
-                <Col style={{ minWidth: '100px' }}>上传文件信息：</Col>
+            {/* <Row wrap={false} style={{ marginBottom: 3 }}>
+                <Col style={{ minWidth: '100px' }}>同位素质量：</Col>
                 <Col>
+                    <span>轻：{new decimal(taskDetail?.calculationParams.cellInfo.isotopeSetting.massSetting.light || 0).toFixed(2).toString()}</span>
+                    <span>重：{new decimal(taskDetail?.calculationParams.cellInfo.isotopeSetting.massSetting.heavy || 0).toFixed(2).toString()}</span>
+                </Col>
+            </Row> */}
+            <Row wrap={false} style={{ marginBottom: 3 }}>
+                <Col style={{ minWidth: '100px' }}>上传文件信息：</Col>
+                <Col style={{ maxWidth: '100%', overflow: 'auto', whiteSpace: 'nowrap' }}>
                     <Space>
                         {
                             fileShowInfo.map((item) => (
@@ -181,29 +185,29 @@ export default function TaskCard(props: IProps) {
                     </Space>
                 </Col>
             </Row>
-            <Row wrap={false}>
+            <Row wrap={false} style={{ marginBottom: 3 }}>
                 <Col style={{ minWidth: '100px' }}>任务创建时间：</Col>
                 <Col>{moment(taskDetail?.createTime).format('YYYY-MM-DD HH:mm:ss')}</Col>
             </Row>
-            <Row wrap={false}>
+            <Row wrap={false} style={{ marginBottom: 3 }}>
                 <Col style={{ minWidth: '100px' }}>任务修改时间：</Col>
                 <Col>{moment(taskDetail?.updateTime).format('YYYY-MM-DD HH:mm:ss')}</Col>
             </Row>
-            <Col style={{ position: 'absolute', top: 35, right: 0, transform: 'rotate(45deg)' }}><StatusIcon status={taskDetail?.calculationStatus} /></Col>
+            {/* <Col style={{ position: 'absolute', top: 35, right: 0, transform: 'rotate(45deg)' }}><StatusIcon status={taskDetail?.calculationStatus} /></Col> */}
             {
                 isAction ? (
                     <>
                         <div style={{
                             width: 130,
                             height: 160,
-                            // backgroundColor: '#f0f0f0',
+                            backgroundColor: theme === 'dark' ? '#000' : '#f0f0f0',
                             position: 'absolute',
                             bottom: -100,
                             right: -40,
                             transform: 'rotate(60deg)',
                             transition: 'all .5s ease'
                         }} />
-                        <Checkbox style={{ position: 'absolute', bottom: 10, right: 10, }} checked={isSelect} onChange={selectChange}>
+                        <Checkbox style={{ position: 'absolute', bottom: 10, right: 5, }} checked={isSelect} onChange={selectChange}>
                             <Typography.Text type={isSelect ? undefined : 'secondary'}>选择</Typography.Text>
                         </Checkbox>
                     </>
