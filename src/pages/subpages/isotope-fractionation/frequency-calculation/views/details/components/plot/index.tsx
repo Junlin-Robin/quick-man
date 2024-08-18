@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { Button, Card, Empty, InputNumber, Space, Spin, Typography } from 'antd';
+import { Button, Card, Empty, Spin, Typography } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import { useMemoizedFn } from 'ahooks';
 import { Line, Scatter } from '@ant-design/charts';
