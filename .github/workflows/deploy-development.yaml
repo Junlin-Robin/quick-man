@@ -88,7 +88,10 @@ jobs:
         env:
           SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }} # 2025-05-19过期
         run: |
-          surge --project ${{ needs.deploy-in-development.outputs.TARGET_FOLDE }} --domain junlin-robin.surge.sh
+          mkdir temp/quick-man
+          cp -r dev/main temp/quick-man
+          surge --project ./temp --domain junlin-robin.surge.sh
+          rm -rf temp
 
 
 
