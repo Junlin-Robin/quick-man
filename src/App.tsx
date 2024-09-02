@@ -59,7 +59,7 @@ function App() {
           // Seed Token，影响范围大
           // colorPrimary: '#faad14',
           // colorInfo: '#faad14',
-          // borderRadius: 2,
+          borderRadius: isLargerThanMinWidth ? 4 : 8,
 
           // 派生变量，影响范围小
           // colorBgContainer: '#ffa940',

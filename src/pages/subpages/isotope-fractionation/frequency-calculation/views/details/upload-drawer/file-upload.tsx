@@ -90,7 +90,7 @@ export default function FileUpload(props: IProps) {
     const createOrModifiedData = useRecoilValue(createOrModifiedDataState);
     const projectDetail = useRecoilValue(projectDetailState);
 
-
+    //编辑任务卡片
     const [isDisabled, setIsDisabled] = useState(false);
     const [taskItem, setTaskItem] = useState<TaskDataType[number] | undefined>();
 
@@ -112,7 +112,7 @@ export default function FileUpload(props: IProps) {
     const handleCleanFile = useMemoizedFn(() => {
         const editInitialValue = {
             taskName: taskItem?.name,
-            isFixed: taskItem?.taskDetail?.isFixed,
+            isFixed: taskItem?.isFixed,
             lightFile: undefined,
             heavyFile: undefined,
             cellFile: undefined,
@@ -130,7 +130,7 @@ export default function FileUpload(props: IProps) {
         } else {
             const editInitialValue = {
                 taskName: taskItem?.name,
-                isFixed: taskItem?.taskDetail?.isFixed,
+                isFixed: taskItem?.isFixed,
                 lightFile: { fileList: taskItem?.fileInfoList?.light },
                 heavyFile: { fileList: taskItem?.fileInfoList?.heavy },
                 cellFile: { fileList: taskItem?.fileInfoList?.cell },
@@ -143,17 +143,12 @@ export default function FileUpload(props: IProps) {
     const submit = useMemoizedFn(async () => {
         //首先检测form必填项目
         await form.validateFields();
-        if (isEdit) {
-            if (!isDisabled) return;
+        if (isEdit && isDisabled) {
             try {
                 const isSuccess = await createOrModifiedData?.({
                     ...(taskItem as TaskDataType[number]),
                     name: form.getFieldValue('taskName') || '',
-                    taskDetail: {
-                        ...(taskItem as TaskDataType[number])?.taskDetail,
-                        name: (form.getFieldValue('taskName') || '') as string,
-                        updateTime: Date.now(),
-                    },
+                    updateTime: Date.now(),
                 }, editTaskId!);
                 if (!isSuccess) throw new Error('创建计算任务失败！');
                 message.success(`${isEdit ? '编辑' : '创建'}计算任务成功！`);
@@ -179,16 +174,16 @@ export default function FileUpload(props: IProps) {
                 cell: cellFile?.text || '',
                 isFixed,
             });
-            //检查上传文件信息是否与工程那个设定一致
+            //检查上传文件信息是否与工程设定一致
             const { isFit, reason } = judgeIsFitProjectSetting({ projectDetail, cellInfo, heavyFile, lightFile });
             if (!isFit) throw new Error(reason);
             const isPhonon_heavy = judgeIsCalculatePhonon(heavyFile?.text || '');
             const isPhonon_light = judgeIsCalculatePhonon(lightFile?.text || '');
             if (isPhonon_heavy !== isPhonon_light) throw new Error('轻、重同位素 .castep 文件计算设置不一致，请仔细检查文件');
-            /**
-             * 这里后续补齐，去掉这个校验
-             */
-            if (isPhonon_heavy) throw new Error('暂不支持计算声子频率，敬请期待～');
+            // /**
+            //  * 这里后续补齐，去掉这个校验
+            //  */
+            // if (isPhonon_heavy) throw new Error('暂不支持计算声子频率，敬请期待～');
             //计算任务名字
             const name = form.getFieldValue('taskName') || '';
             const taskId = isEdit ? editTaskId : nanoid();
@@ -196,23 +191,42 @@ export default function FileUpload(props: IProps) {
             const isSuccess = await createOrModifiedData?.({
                 name,
                 id: taskId,
-                taskDetail: {
-                    name,
-                    id: taskId,
-                    isFixed,
-                    createTime: isEdit ? (taskItem?.taskDetail?.createTime ?? Date.now()) : Date.now(),
-                    updateTime: Date.now(),
-                    calculationStatus: TASK_CALCULATION_STATUS.WAITING,
-                    calculationParams: {
-                        softWare: SOFTERWARE_TYPE.CASTEP,
-                        isPhonon: isPhonon_heavy,
-                        frequencyInfo: {
-                            heavy: heavyFile?.info || [],
-                            light: lightFile?.info || [],
-                        },
-                        cellInfo: cellInfo,
-                    },
+                // fileInfo: {
+                //     heavy: heavyFile?.fileList || [],
+                //     light: lightFile?.fileList || [],
+                //     cell: cellFile?.fileList || [],
+                // },
+                calculationStatus: TASK_CALCULATION_STATUS.WAITING,
+                createTime: isEdit ? (taskItem?.createTime ?? Date.now()) : Date.now(),
+                updateTime: Date.now(),
+                isFixed,
+                softWare: SOFTERWARE_TYPE.CASTEP,
+                isPhonon: isPhonon_heavy,
+                isotopeSetting: cellInfo?.isotopeSetting || {},
+                cellInfo: {
+                    atomNumbers: cellInfo?.atomNumbers,
+                    atomPositionMatrix: cellInfo?.atomPositionMatrix,
+                    atomTypeNumbers: cellInfo?.atomTypeNumbers,
                 },
+                heavyFreqInfo: heavyFile?.info || [],
+                lightFreqInfo: lightFile?.info || [],
+                // taskDetail: {
+                //     name,
+                //     id: taskId,
+                //     isFixed,
+                //     createTime: isEdit ? (taskItem?.taskDetail?.createTime ?? Date.now()) : Date.now(),
+                //     updateTime: Date.now(),
+                //     calculationStatus: TASK_CALCULATION_STATUS.WAITING,
+                //     calculationParams: {
+                //         softWare: SOFTERWARE_TYPE.CASTEP,
+                //         isPhonon: isPhonon_heavy,
+                //         frequencyInfo: {
+                //             heavy: heavyFile?.info || [],
+                //             light: lightFile?.info || [],
+                //         },
+                //         cellInfo: cellInfo,
+                //     },
+                // },
                 fileInfoList: {
                     heavy: heavyFile?.fileList || [],
                     light: lightFile?.fileList || [],

@@ -125,7 +125,7 @@ export function getCellInfo(
         const isPhonon_light = judgeIsCalculatePhonon(castepText_Light);
         if (isPhonon_heavy !== isPhonon_light) return rej(new Error('轻、重同位素计算文件设置的计算类型不一致，请检查后重新计算！'));
         //判断计算类型是否是声子频率
-        const isPhonon = isPhonon_heavy;
+        // const isPhonon = isPhonon_heavy;
 
 
         /**
@@ -133,9 +133,9 @@ export function getCellInfo(
          * ！！！！！！！1
          * ！！！！！！！
          */
-        if (isPhonon) {
-            return;
-        }
+        // if (isPhonon) {
+        //     return;
+        // }
 
         //固定原子信息
         let fixedAtomInfos: {

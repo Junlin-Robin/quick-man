@@ -160,10 +160,21 @@ export default function ProjectDetail(props: { id: string }) {
         <Card title="计算设置" extra={
           <Segmented options={calculationServiceOptions} value={calculationType} onChange={(v) => setCalculationType(v)} />
         }>
-          <Form form={form} colon onFinish={submit} onReset={reset}>
+          <Form form={form} colon onFinish={submit} onReset={reset} layout='horizontal' preserve={false}>
             <Form.Item label="项目名字" name="taskIds" rules={[{ required: true, message: '必须有项目名字' }]}>
               <CascaderPro allowClear placeholder="请输入项目名" options={taskOptions} loading={loading} />
             </Form.Item>
+            {
+              calculationType === 1 ? (
+                <Form.Item label="温度梯度" name="temperature_d">
+                  <CascaderPro allowClear placeholder="请输入项目名" options={taskOptions} loading={loading} />
+                </Form.Item>
+              ) : (
+                <Form.Item label="温度选择" name="tem">
+                  <CascaderPro allowClear placeholder="请输入项目名" options={taskOptions} loading={loading} />
+                </Form.Item>
+              )
+            }
             <Row justify="end">
               <Space>
                 <Button htmlType='reset'>重置</Button>

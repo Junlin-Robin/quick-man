@@ -11,6 +11,8 @@ import ProjectForm from "./components/project-form";
 import { useCreateOrModifiedProject, useGetProjectList, deleteProject } from './hooks/use-operate-project';
 import { isEmpty } from "lodash";
 
+import Marquee from 'react-fast-marquee';
+
 const { useBreakpoint } = Grid;
 export default function FrequencyCalculation() {
   const [form] = Form.useForm();
@@ -92,10 +94,10 @@ export default function FrequencyCalculation() {
     <>
       <PageHeader title="频率分馏计算" />
       <Space direction="vertical" style={{ width: '100%' }}>
-        <Alert message={pageInfoText} type="info" showIcon closable />
+        <Alert message={<Marquee speed={30} delay={5}>{pageInfoText}</Marquee>} type="info" showIcon closable />
         <Row justify="space-between" gutter={12} wrap={false}>
           <Col flex={1}>
-            <Input.Search placeholder="请输入查询的工程名进行搜索" allowClear onSearch={(v) => {
+            <Input.Search placeholder="请输入工程名进行搜索" allowClear onSearch={(v) => {
               triggerGetProjects(v);
               v ? setIsSearch(true) : setIsSearch(false);
             }} />

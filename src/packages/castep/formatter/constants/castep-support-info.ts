@@ -8,7 +8,7 @@ export const VERSION = '2017';
  */
 export enum CALCULATION_TYPE_ENUM {
     E_FIELD = 'Phonon followed by E-field',
-    PHONON = 'Phonon',
+    PHONON = 'phonon calculation',
 }
 
 /**

@@ -27,7 +27,14 @@ export default function Sider(props: Iprops) {
 
 
   useEffect(() => {
-    setSelectedKeys(location.pathname)
+    setSelectedKeys(location.pathname);
+    // requestAnimationFrame(() => window.scrollTo({
+    //   top: 0,
+    //   left: 0,
+    //   // behavior: 'smooth',
+    // }))
+    window.scrollTo(0, 0);
+    
   }, [location])
 
   useMount(() => {

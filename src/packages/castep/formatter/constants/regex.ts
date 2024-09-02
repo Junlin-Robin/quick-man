@@ -1,8 +1,20 @@
 /**
- * 匹配计算频率信息
+ * 匹配Gamma点计算频率信息
  * 全局匹配-开头会携带匹配标志位+
  */
-export const regexVibrationFrequencyMatrix = /\+\s+\d+\s+-?\d+\.?\d+\s+[a-d]\s+\d+\.?\d+\s+(?:N|Y)\s+(?:\d+\.?\d+)?\s+(?:N|Y)(?=\s+\+)/g;
+export const regexGammaVibrationFrequencyMatrix = /\+\s+\d+\s+-?\d+\.?\d+\s+[a-z]\s+\d+\.?\d+\s+(?:N|Y)\s+(?:\d+\.?\d+)?\s+(?:N|Y)(?=\s+\+)/g;
+
+/**
+ * 匹配声子频率的频率信息
+ * 全局匹配-开头会携带匹配标志位+
+ */
+export const regexPhononVibrationFrequencyMatrix = /\+\s+\d+\s+-?\d+\.?\d+\s+[a-z](?:\s+\d+\.?\d+\s+(?:N|Y)\s+(?:\d+\.?\d+)?\s+(?:N|Y))?(?=\s+\+)/g;
+
+/**
+ * 匹配声子频率的频率信息
+ * 全局匹配-开头会携带匹配标志位+
+ */
+export const regexVibrationFrequencyProportions = /(?:\+\s+q-pt=\s+\d+\s+\(\s+-?\d+\.?\d+\s+-?\d+\.?\d+\s+-?\d+\.?\d+\)\s+)(\d+\.?\d+)(?=\s+\+)/g;
 
 /**
  * 匹配CASTEP版本信息

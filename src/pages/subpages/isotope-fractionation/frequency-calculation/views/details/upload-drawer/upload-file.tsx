@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Upload, Typography, Spin, Row, Col } from "antd";
+import { Upload, Typography, Spin, Row, Col, message } from "antd";
 import type { UploadProps, UploadFile } from 'antd';
 import type { UploadRequestOption } from 'rc-upload/lib/interface'
 import { InboxOutlined, FileTextOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
@@ -35,7 +35,8 @@ const EMPTY_FREQUENCY_INFO = {
     ir: [],
     irActive: [],
     raman: [],
-    ramanActive: []
+    ramanActive: [],
+    proportions: [],
 }
 
 export default function UploadFile(props: IProps) {
@@ -55,25 +56,22 @@ export default function UploadFile(props: IProps) {
                 let frequencyInfo;
                 if (fileType === CASTEP_FILETYPE.CASTEP) {
                     frequencyInfo = await getVibrationFrequencyInfo(fileContent);
-                    // onChange?.(fileContent, frequencyInfo);
                 }
                 onChange?.({
                     fileList: [{ name, uid, status: FILE_UPLOAD_STATUS.DONE }],
                     text: fileContent,
                     info: fileType === CASTEP_FILETYPE.CASTEP ? frequencyInfo : undefined,
                 });
-                // setFileList([{ name, uid, status: FILE_UPLOAD_STATUS.DONE }]);
                 onSuccess?.({ name, uid });
             } catch (error) {
-                // setFileList([{ name, uid, status: 'error' }]);
-                // if (fileType === CASTEP_FILETYPE.CASTEP) onChange?.('', EMPTY_FREQUENCY_INFO);
-                // else onChange?.('');
+                const messageInfo = (error as Error)?.message ? `上传文件失败：${(error as Error)?.message}` : '文件解析失败';
                 onChange?.({
-                    fileList: [{ name, uid, status: FILE_UPLOAD_STATUS.ERROR }],
+                    fileList: [{ name, uid, status: FILE_UPLOAD_STATUS.ERROR, response: messageInfo }],
                     text: '',
                     info: fileType === CASTEP_FILETYPE.CASTEP ? EMPTY_FREQUENCY_INFO : undefined,
                 });
-                onError?.({ name, message: (error as Error)?.message || '文件解析失败' });
+                message.error(messageInfo);
+                onError?.({ name, message: messageInfo });
             } finally {
                 setLoading(false);
             }

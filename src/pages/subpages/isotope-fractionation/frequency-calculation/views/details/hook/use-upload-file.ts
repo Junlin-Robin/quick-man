@@ -1,11 +1,6 @@
 import { useEffect } from "react";
 import { message } from 'antd';
 import { useSetRecoilState, useRecoilState } from 'recoil';
-import {
-    judgeLocalStorageisAvailable,
-    getAndParseValueInLoaclStorage,
-    stringifyAndSetValueInLocalStorage,
-} from "@/utils/operate-storage";
 
 import {
     getDataState,
@@ -20,6 +15,11 @@ import {
 import type { TaskDataType } from '../../../models'
 import { useMemoizedFn } from "ahooks";
 
+import {
+    DATA_BASE_NAME, INITIAL_DATA_BASE_VERSION, DATA_BASE_INDEX,
+} from '../../../constants';
+
+import Dexie from 'dexie';
 /**
  * 上传文件设置计算任务、获取存储的计算任务的代码
  * 待更改点：
@@ -35,6 +35,19 @@ export function useDealFileUpload(key: string) {
     const setCreateOrModifiedData = useSetRecoilState(createOrModifiedDataState); // 使用 Recoil 的 set 函数
     const setGetData = useSetRecoilState(getDataState); // 使用 Recoil 的 set 函数
 
+    const db = new Dexie(DATA_BASE_NAME);
+
+    // 获取当前版本号
+    const currentVersion = db.verno;
+
+    if (key) {
+        // 定义数据库的版本和对象存储
+        db.version(currentVersion || INITIAL_DATA_BASE_VERSION).stores({ [key]: DATA_BASE_INDEX });
+    } else {
+        message.error('系统错误，未设置工程id，请联系管理员！');
+    }
+
+
     //获取工程信息,直接得到所有任务列表
     const getData = useMemoizedFn((search?: string): Promise<TaskDataType> => {
         return new Promise((res, rej) => {
@@ -42,42 +55,25 @@ export function useDealFileUpload(key: string) {
                 return rej(new Error('系统错误，未设置工程id，请联系管理员！'));
             }
 
-            //首先判断浏览器是否支持localStorage
-            try {
-                judgeLocalStorageisAvailable();
-            } catch (error) {
-                return rej(error);
-            }
-
             setLoading(true);
 
-            //所有的项目列表
-            let allProjectList: TaskDataType = [];
-            //过滤出来的项目列表
-            let filterProjectList: TaskDataType = [];
-
-            try {
-                allProjectList = getAndParseValueInLoaclStorage(key);
-            } catch (error) {
-                // message.error((error as Error).message);
-                return rej(error);
-            }
-
-            if (!search) {
-                filterProjectList = allProjectList
-            } else {
-                const searchProjectIdList = allProjectList.filter((item) => item?.taskDetail?.name.includes(search));
-                filterProjectList = searchProjectIdList;
-            }
-
-            //暂时设置随机不超过1s的延时，模拟等待
-            setTimeout(() => {
+            db.table(key)?.filter((dataItem) => {
+                if (search) return dataItem?.taskDetail?.name.includes(search);
+                return true;
+            })?.toArray().then((result) => {
+                //暂时设置随机不超过1s的延时，模拟等待
+                setTimeout(() => {
+                    setLoading(false);
+                    res(result);
+                }, Math.random() * 1000);
+            }).catch((error) => {
                 setLoading(false);
-                res(filterProjectList);
-            }, Math.random() * 1000);
+                rej(error || new Error('查询计算任务失败！'));
+            });
+
         });
     });
-    
+
     //
     const triggerGetData = useMemoizedFn(async (search?: string): Promise<void> => {
 
@@ -97,16 +93,9 @@ export function useDealFileUpload(key: string) {
         return;
     });
 
-    const deleteData = useMemoizedFn((id: string | string[]): boolean => {
+    const deleteData = useMemoizedFn(async (id: string | string[]): Promise<boolean> => {
         if (!key) {
             message.error('系统错误，未设置工程id，请联系管理员！');
-            return false;
-        }
-        //首先判断浏览器是否支持localStorage
-        try {
-            judgeLocalStorageisAvailable()
-        } catch (error) {
-            message.error((error as Error).message)
             return false;
         }
 
@@ -115,35 +104,12 @@ export function useDealFileUpload(key: string) {
             return false;
         }
 
-        let projectIdList: TaskDataType = [];
-
         try {
-            projectIdList = getAndParseValueInLoaclStorage(key);
+            await db.table(key)?.bulkDelete([...id]);
+            return true;
         } catch (error) {
-            message.error((error as Error).message);
             return false;
         }
-
-        //过滤掉当前删除的id
-        const filterProjectList = projectIdList.filter((item) => {
-            if (Array.isArray(id)) {
-                return !id.includes(item?.taskDetail?.id)
-            } else {
-                return item?.taskDetail?.id !== id
-            }
-        });
-
-        try {
-            stringifyAndSetValueInLocalStorage(filterProjectList, key);
-            // triggerGetData();
-        } catch (error) {
-            message.error((error as Error).message);
-            return false;
-        }
-
-        // localStorage.removeItem(id);
-
-        return true;
 
     });
 
@@ -153,12 +119,6 @@ export function useDealFileUpload(key: string) {
     ) => new Promise<boolean>((res, rej) => {
         if (!key) return rej(new Error('系统错误，未设置工程id，请联系管理员！'));
 
-        //首先判断浏览器是否支持localStorage
-        try {
-            judgeLocalStorageisAvailable()
-        } catch (error) {
-            return rej(error);
-        }
 
         if (!id) {
             return rej(new Error('系统错误，未设置计算任务id，请联系管理员！'));
@@ -166,50 +126,23 @@ export function useDealFileUpload(key: string) {
 
         setLoading(true);
 
-        let historyProjectIdList: TaskDataType = [];
 
-        try {
-            historyProjectIdList = getAndParseValueInLoaclStorage(key);
-        } catch (error) {
-            return rej(error);
-        }
-
-        const name = newValue?.name;
-        const isExistSameName = historyProjectIdList.some((item) => item?.name === name && item?.taskDetail?.id !== id);
-
-        if (isExistSameName) {
-            return rej(new Error('计算任务名称重复，请重新命名！'));
-        }
-
-        const existIdIndex = historyProjectIdList.findIndex((item) => item?.taskDetail?.id === id);
-
-        let newProjectIdList = [];
-
-        if (existIdIndex !== -1) {
-            historyProjectIdList[existIdIndex] = {
-                ...newValue,
-            };
-            newProjectIdList = [...historyProjectIdList];
-        } else {
-            newProjectIdList = [...historyProjectIdList, {
-                ...newValue,
-            }]
-        }
-
-        try {
-            stringifyAndSetValueInLocalStorage(newProjectIdList, key)
-        } catch (error) {
-            return rej(error);
-        }
-
-        // localStorage.setItem(id, JSON.stringify({}));
-
-        //暂时设置随机不超过1s的延时，模拟等待
-        setTimeout(() => {
+        db.table(key).get(id).then((result) => {
+            if (result) {
+                db.table(key).update(id, newValue);
+            } else {
+                db.table(key).add(newValue);
+            }
+            //暂时设置随机不超过1s的延时，模拟等待
+            setTimeout(() => {
+                setLoading(false);
+                return res(true);
+            }, Math.random() * 1000);
+        }).catch((error) => {
             setLoading(false);
-            // triggerGetData();
-            return res(true);
-        }, Math.random() * 1000);
+            return rej(error || new Error('系统错误，请联系管理员'));
+        });
+
 
     }));
 

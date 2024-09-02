@@ -5,11 +5,17 @@ import type { CalculationResults } from '../models';
 import type { TaskDataType } from '../../../models';
 import { CALCULATION_SERVICE, TASK_CALCULATION_STATUS } from '../../../constants';
 
+// import {
+//     judgeLocalStorageisAvailable,
+//     getAndParseValueInLoaclStorage,
+//     stringifyAndSetValueInLocalStorage,
+// } from "@/utils/operate-storage";
+
 import {
-    judgeLocalStorageisAvailable,
-    getAndParseValueInLoaclStorage,
-    stringifyAndSetValueInLocalStorage,
-} from "@/utils/operate-storage";
+    DATA_BASE_NAME, INITIAL_DATA_BASE_VERSION, DATA_BASE_INDEX,
+} from '../../../constants';
+
+import Dexie from 'dexie';
 
 // import { calculateISOFractionationFromFrequencyByCASTEP } from "@/packages/castep/calculation/isotope-fractionation";
 // import { calculateForceConstantFromFrequency } from "@/packages/castep/calculation/force-constant";
@@ -20,6 +26,18 @@ export default function useCalculateTasks(key: string) {
     const [calculationResults, setCalculationResults] = useState<CalculationResults>([]);
 
     const calculateWorker = new Worker(new URL('../worker/calculate.ts', import.meta.url), { type: 'module' });
+
+    const db = new Dexie(DATA_BASE_NAME);
+
+    // 获取当前版本号
+    const currentVersion = db.verno;
+
+    if (key) {
+        // 定义数据库的版本和对象存储
+        db.version(currentVersion || INITIAL_DATA_BASE_VERSION).stores({ [key]: DATA_BASE_INDEX });
+    } else {
+        message.error('系统错误，未设置工程id，请联系管理员！');
+    }
 
     async function calculateAndSaveFrequency(taskIdList: string[], isSetCalculationResults: boolean = true): Promise<boolean> {
         /**没有传计算任务id，则直接设置空数组 */
@@ -33,26 +51,28 @@ export default function useCalculateTasks(key: string) {
             return false;
         }
 
-        //首先判断浏览器是否支持localStorage
-        try {
-            judgeLocalStorageisAvailable();
-        } catch (error) {
-            message.error((error as Error).message)
-            return false;
-        }
+        // //首先判断浏览器是否支持localStorage
+        // try {
+        //     judgeLocalStorageisAvailable();
+        // } catch (error) {
+        //     message.error((error as Error).message)
+        //     return false;
+        // }
 
         setLoading(true);
 
 
-        let storageAllTasksInfo: TaskDataType = [];
+        // let storageAllTasksInfo: TaskDataType = [];
 
-        try {
-            storageAllTasksInfo = getAndParseValueInLoaclStorage<TaskDataType>(key);
-        } catch (error) {
-            message.error((error as Error).message);
-            return false;
-            // rej(error);
-        }
+        const storageAllTasksInfo: TaskDataType = await db.table(key).toArray();
+
+        // try {
+        //     storageAllTasksInfo = getAndParseValueInLoaclStorage<TaskDataType>(key);
+        // } catch (error) {
+        //     message.error((error as Error).message);
+        //     return false;
+        //     // rej(error);
+        // }
 
         const waitToCalculateTasks: TaskDataType = [];
         const alreadyCalculatedTasks: TaskDataType = [];
@@ -61,8 +81,8 @@ export default function useCalculateTasks(key: string) {
         taskIdList?.forEach((taskId) => {
             const taskInfo = storageAllTasksInfo.find((item) => item.id === taskId);
             if (isNil(taskInfo)) return;
-            const existIsotopeFractionation = taskInfo.taskResult?.isotopeFractionation;
-            const taskStatus = taskInfo?.taskDetail?.calculationStatus;
+            const existIsotopeFractionation = taskInfo?.isotopeFractionation;
+            const taskStatus = taskInfo?.calculationStatus;
             /**待计算、或者频率存储值为空重新计算 */
             const isNeedCalculate = isNil(existIsotopeFractionation) || isEmpty(existIsotopeFractionation);
             const isTaskError = taskStatus === TASK_CALCULATION_STATUS.FAILED;
@@ -91,17 +111,18 @@ export default function useCalculateTasks(key: string) {
             else return newCalculateTask;
         });
 
-        try {
-            stringifyAndSetValueInLocalStorage(newAllTasksInfo, key)
-        } catch (error) {
-            message.error((error as Error).message);
-            return false;
-        }
+        // try {
+        //     stringifyAndSetValueInLocalStorage(newAllTasksInfo, key)
+        // } catch (error) {
+        //     message.error((error as Error).message);
+        //     return false;
+        // }
+        await db.table(key).bulkPut(newAllTasksInfo);
 
         isSetCalculationResults && setCalculationResults(calculatedTasks.concat(alreadyCalculatedTasks).map((task) => {
             const taskId = task.id;
             const taskName = task.name;
-            const frequencyInfo = task.taskResult?.isotopeFractionation?.map((item) => ({
+            const frequencyInfo = task.isotopeFractionation?.map((item) => ({
                 fractionation: item.fractionation,
                 beta: item.beta,
                 /**未进行归一化值 */
@@ -111,9 +132,9 @@ export default function useCalculateTasks(key: string) {
                 name: task.name,
                 T: item.T,
             }));
-            const forceConstant = task.taskResult?.forceConstants;
-            const isPhonon = task.taskDetail.calculationParams.isPhonon;
-            const isotopeDetailSetting = task.taskDetail.calculationParams.cellInfo.isotopeSetting;
+            const forceConstant = task.forceConstant;
+            const isPhonon = task.isPhonon;
+            const isotopeDetailSetting = task.isotopeSetting;
             return {
                 taskId,
                 taskName,
@@ -155,23 +176,25 @@ export default function useCalculateTasks(key: string) {
             return false;
         }
 
-        //首先判断浏览器是否支持localStorage
-        try {
-            judgeLocalStorageisAvailable();
-        } catch (error) {
-            message.error((error as Error).message)
-            return false;
-        }
+        // //首先判断浏览器是否支持localStorage
+        // try {
+        //     judgeLocalStorageisAvailable();
+        // } catch (error) {
+        //     message.error((error as Error).message)
+        //     return false;
+        // }
         setLoading(true);
 
-        let storageAllTasksInfo: TaskDataType = [];
+        const storageAllTasksInfo: TaskDataType = await db.table(key).toArray();
 
-        try {
-            storageAllTasksInfo = getAndParseValueInLoaclStorage<TaskDataType>(key);
-        } catch (error) {
-            message.error((error as Error).message);
-            return false;
-        }
+        // let storageAllTasksInfo: TaskDataType = [];
+
+        // try {
+        //     storageAllTasksInfo = getAndParseValueInLoaclStorage<TaskDataType>(key);
+        // } catch (error) {
+        //     message.error((error as Error).message);
+        //     return false;
+        // }
 
         const waitToCalculateForceConstantTasks: TaskDataType = [];
         const waitToCalculateIsotopeFractionationTasks: TaskDataType = [];
@@ -181,9 +204,9 @@ export default function useCalculateTasks(key: string) {
         taskIdList?.forEach((taskId) => {
             const taskInfo = storageAllTasksInfo.find((item) => item.id === taskId);
             if (isNil(taskInfo)) return;
-            const existIsotopeFractionation = taskInfo.taskResult?.isotopeFractionation;
-            const existForceConstant = taskInfo.taskResult?.forceConstants;
-            const taskStatus = taskInfo?.taskDetail?.calculationStatus;
+            const existIsotopeFractionation = taskInfo.isotopeFractionation;
+            const existForceConstant = taskInfo.forceConstant;
+            const taskStatus = taskInfo?.calculationStatus;
             /**待计算、分馏、力常数为空都需要重新计算 */
             const isNeedCalculateFractionation = isEmpty(existIsotopeFractionation) || isNil(existIsotopeFractionation);
             const isNeedCalculateForceConstant = isNil(existForceConstant);
@@ -277,17 +300,19 @@ export default function useCalculateTasks(key: string) {
             return task;
         });
 
-        try {
-            stringifyAndSetValueInLocalStorage(newAllTasksInfo, key)
-        } catch (error) {
-            message.error((error as Error).message);
-            return false;
-        }
+        await db.table(key).bulkPut(newAllTasksInfo);
+        // try {
+        //     stringifyAndSetValueInLocalStorage(newAllTasksInfo, key)
+        // } catch (error) {
+        //     message.error((error as Error).message);
+        //     setLoading(false);
+        //     return false;
+        // }
 
         setCalculationResults(calculatedTasks.concat(alreadyCalculatedTasks).map((task) => {
             const taskId = task.id;
             const taskName = task.name;
-            const frequencyInfo = task.taskResult?.isotopeFractionation?.map((item) => ({
+            const frequencyInfo = task.isotopeFractionation?.map((item) => ({
                 fractionation: item.fractionation,
                 beta: item.beta,
                 /**未进行归一化值 */
@@ -297,9 +322,9 @@ export default function useCalculateTasks(key: string) {
                 name: task.name,
                 T: item.T,
             }));
-            const forceConstant = task.taskResult?.forceConstants;
-            const isPhonon = task.taskDetail.calculationParams.isPhonon;
-            const isotopeDetailSetting = task.taskDetail.calculationParams.cellInfo.isotopeSetting;
+            const forceConstant = task.forceConstant;
+            const isPhonon = task.isPhonon;
+            const isotopeDetailSetting = task.isotopeSetting;
             return {
                 taskId,
                 taskName,

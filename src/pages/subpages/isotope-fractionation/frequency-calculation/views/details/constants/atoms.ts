@@ -21,7 +21,7 @@ export const triggerGetDataState = atom<((text?: string) => Promise<void>) | nul
     default: null, // Atom 的默认值
 });
 
-export const deleteDataState = atom<((id: string | string[]) => boolean) | null>({
+export const deleteDataState = atom<((id: string | string[]) => Promise<boolean>) | null>({
     key: 'deleteDataState', // 唯一的 ID，用于区分不同的 Atom
     default: null, // Atom 的默认值
 });

@@ -20,17 +20,18 @@ function formatParams(waitToCalculateTasks: TaskDataType, type: CALCULATION_SERV
     }
     if (type === CALCULATION_SERVICE.ISOTOPE_FRACTIONATION || type === CALCULATION_SERVICE.FORCE_CONSTANT) {
         const calculateParamList = waitToCalculateTasks.map((task) => {
-            const frequencyInfo = task.taskDetail?.calculationParams?.frequencyInfo;
-            const isotopeSetting = task.taskDetail?.calculationParams?.cellInfo?.isotopeSetting;
+            // const frequencyInfo = task.frequencyInfo;
+            // const isotopeSetting = task.taskDetail?.calculationParams?.cellInfo?.isotopeSetting;
             return {
                 freq: {
-                    heavy: frequencyInfo?.heavy?.frequency as string[],
-                    light: frequencyInfo?.light?.frequency as string[],
+                    heavy: task.heavyFreqInfo?.frequency as string[][],
+                    light: task.lightFreqInfo?.frequency as string[][],
                 },
                 cell: {
-                    isotopeNumber: isotopeSetting?.isotopeNumber as number,
-                    massSetting: isotopeSetting?.massSetting,
-                }
+                    isotopeNumber: task.isotopeSetting?.isotopeNumber as number,
+                    massSetting: task.isotopeSetting?.massSetting,
+                },
+                proportions: task.heavyFreqInfo?.proportions,
             }
         });
         return calculateParamList || [];
@@ -40,8 +41,8 @@ function formatParams(waitToCalculateTasks: TaskDataType, type: CALCULATION_SERV
 
 interface CalculatParams {
     freq: {
-        heavy: string[];
-        light: string[];
+        heavy: string[][];
+        light: string[][];
     };
     cell: {
         isotopeNumber: number;
@@ -50,6 +51,7 @@ interface CalculatParams {
             light: string;
         };
     };
+    proportions: string[];
 }
 async function doFractionationCalculate(params: { calculateParamList: CalculatParams[], waitToCalculateTasks: TaskDataType }) {
     const { calculateParamList, waitToCalculateTasks } = params || {};
@@ -60,21 +62,15 @@ async function doFractionationCalculate(params: { calculateParamList: CalculatPa
         const calculateResults = await calculateISOFractionationFromFrequencyByCASTEP(calculateParamList);
         calculatedTasks = waitToCalculateTasks.map((task, index) => ({
             ...task || {},
-            taskDetail: {
-                ...task.taskDetail,
-                updateTime: Date.now(),
-                calculationStatus: TASK_CALCULATION_STATUS.SUCCESS,
-            },
-            taskResult: {
-                ...task.taskResult || {},
-                isotopeFractionation: calculateResults[index],
-            },
+            updateTime: Date.now(),
+            calculationStatus: TASK_CALCULATION_STATUS.SUCCESS,
+            isotopeFractionation: calculateResults[index],
         }));
     } catch (error) {
         calculatedTasks = waitToCalculateTasks.map((task) => ({
             ...task,
             taskDetail: {
-                ...task.taskDetail || {},
+                ...task || {},
                 updateTime: Date.now(),
                 calculationStatus: TASK_CALCULATION_STATUS.FAILED,
             },
@@ -96,24 +92,15 @@ async function doForceConstantCalculate(params: { calculateParamList: CalculatPa
         const calculateResults = await calculateForceConstantFromFrequency(calculateParamList);
         calculatedTasks = waitToCalculateTasks.map((task, index) => ({
             ...task || {},
-            taskDetail: {
-                ...task.taskDetail,
-                updateTime: Date.now(),
-                calculationStatus: TASK_CALCULATION_STATUS.SUCCESS,
-            },
-            taskResult: {
-                ...task.taskResult || {},
-                forceConstants: calculateResults[index]?.forceConstant,
-            },
+            updateTime: Date.now(),
+            calculationStatus: TASK_CALCULATION_STATUS.SUCCESS,
+            forceConstants: calculateResults[index]?.forceConstant,
         }));
     } catch (error) {
         calculatedTasks = waitToCalculateTasks.map((task) => ({
             ...task,
-            taskDetail: {
-                ...task.taskDetail || {},
-                updateTime: Date.now(),
-                calculationStatus: TASK_CALCULATION_STATUS.FAILED,
-            },
+            updateTime: Date.now(),
+            calculationStatus: TASK_CALCULATION_STATUS.FAILED,
         }));
         isSuccess = false;
     }

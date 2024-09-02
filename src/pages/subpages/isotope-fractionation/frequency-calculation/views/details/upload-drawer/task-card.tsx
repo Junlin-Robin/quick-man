@@ -7,7 +7,7 @@ import {
 import {
     ClockCircleOutlined, CheckCircleOutlined, SyncOutlined, CloseCircleOutlined,
 } from '@ant-design/icons';
-import type { TaskDetail, FileInfoType } from '../../../models';
+import type { FileInfoType } from '../../../models';
 import { TASK_CALCULATION_STATUS, FILE_UPLOAD_STATUS } from '../../../constants';
 
 import { useRecoilValue } from 'recoil';
@@ -55,7 +55,11 @@ function StatusIcon(props: { status: TASK_CALCULATION_STATUS }) {
 interface IProps {
     // calculationServices: CALCULATION_SERVICE[];
     onEdit: () => void;
-    taskDetail: TaskDetail;
+    taskId: string;
+    taskName: string;
+    createTime: number;
+    updateTime: number;
+    calculationStatus: TASK_CALCULATION_STATUS;
     isAction: boolean;
     fileInfoList: {
         light: FileInfoType[];
@@ -68,7 +72,8 @@ interface IProps {
 
 export default function TaskCard(props: IProps) {
     const {
-        taskDetail, onEdit, isAction, onSelect, actionSelectList, fileInfoList,
+        onEdit, isAction, onSelect, actionSelectList, fileInfoList,
+        taskId, taskName, createTime, updateTime, calculationStatus,
     } = props;
 
     // const [isSelect, setIsSelect] = useState(actionSelectList?.includes(taskDetail.id) || false);
@@ -82,18 +87,18 @@ export default function TaskCard(props: IProps) {
         const isSelected = e.target.checked || false;
         // setIsSelect(isSelected);
         if (isSelected) {
-            onSelect?.((v: string[]) => [...v ?? [], taskDetail.id]);
+            onSelect?.((v: string[]) => [...v ?? [], taskId]);
         } else {
             onSelect?.((v: string[]) => {
                 if (!v) return [];
-                return v.filter((id) => id !== taskDetail.id);
+                return v.filter((id) => id !== taskId);
             })
         }
     };
 
     const isSelect = useMemo(() => {
-        return actionSelectList?.includes(taskDetail.id) || false;
-    }, [actionSelectList, taskDetail.id]);
+        return actionSelectList?.includes(taskId) || false;
+    }, [actionSelectList, taskId]);
 
 
     const fileShowInfo = useMemo(() => {
@@ -112,14 +117,14 @@ export default function TaskCard(props: IProps) {
             title={
                 <>
                     <Row>
-                        <Tooltip title={taskDetail?.name} placement='top'>
-                            <Col style={{ textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: 180 }}>{taskDetail?.name || '-'}</Col>
+                        <Tooltip title={taskName} placement='top'>
+                            <Col style={{ textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: 180 }}>{taskName || '-'}</Col>
                         </Tooltip>
                     </Row>
                     <Row>
                         <Col style={{ textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: 180 }}>
-                            <Tooltip title={taskDetail?.id} placement='bottom'>
-                                <Typography.Text type="secondary" style={{ fontWeight: 400, fontSize: 12 }}>ID: {taskDetail?.id}</Typography.Text>
+                            <Tooltip title={taskId} placement='bottom'>
+                                <Typography.Text type="secondary" style={{ fontWeight: 400, fontSize: 12 }}>ID: {taskId}</Typography.Text>
                             </Tooltip>
                         </Col>
                     </Row>
@@ -135,9 +140,9 @@ export default function TaskCard(props: IProps) {
                         <Button type="link" danger style={{ paddingRight: 0 }} onClick={() => {
                             Modal.confirm({
                                 title: '确认',
-                                content: `确认删除 ${taskDetail?.name || ''} 计算任务？`,
+                                content: `确认删除 ${taskName || ''} 计算任务？`,
                                 onOk: () => {
-                                    const isSuccess = deleteData?.(taskDetail?.id);
+                                    const isSuccess = deleteData?.(taskId);
                                     if (!isSuccess) message.error('删除任务失败！');
                                     else message.success('删除任务成功！');
                                     triggerGetData?.();
@@ -158,7 +163,7 @@ export default function TaskCard(props: IProps) {
             <Row wrap={false} style={{ marginBottom: 3 }}>
                 <Col style={{ minWidth: '100px' }}>计算任务状态：</Col>
                 <Col>
-                    <StatusIcon status={taskDetail?.calculationStatus} />
+                    <StatusIcon status={calculationStatus} />
                 </Col>
             </Row>
             {/* <Row wrap={false} style={{ marginBottom: 3 }}>
@@ -167,6 +172,10 @@ export default function TaskCard(props: IProps) {
                     <span>轻：{new decimal(taskDetail?.calculationParams.cellInfo.isotopeSetting.massSetting.light || 0).toFixed(2).toString()}</span>
                     <span>重：{new decimal(taskDetail?.calculationParams.cellInfo.isotopeSetting.massSetting.heavy || 0).toFixed(2).toString()}</span>
                 </Col>
+            </Row> */}
+            {/* <Row wrap={false} style={{ marginBottom: 3 }}>
+                <Col style={{ minWidth: '100px' }}>是否计算声子：</Col>
+                <Col>{isPhonon ? '是' : '否'}</Col>
             </Row> */}
             <Row wrap={false} style={{ marginBottom: 3 }}>
                 <Col style={{ minWidth: '100px' }}>上传文件信息：</Col>
@@ -187,11 +196,11 @@ export default function TaskCard(props: IProps) {
             </Row>
             <Row wrap={false} style={{ marginBottom: 3 }}>
                 <Col style={{ minWidth: '100px' }}>任务创建时间：</Col>
-                <Col>{moment(taskDetail?.createTime).format('YYYY-MM-DD HH:mm:ss')}</Col>
+                <Col>{moment(createTime).format('YYYY-MM-DD HH:mm:ss')}</Col>
             </Row>
             <Row wrap={false} style={{ marginBottom: 3 }}>
                 <Col style={{ minWidth: '100px' }}>任务修改时间：</Col>
-                <Col>{moment(taskDetail?.updateTime).format('YYYY-MM-DD HH:mm:ss')}</Col>
+                <Col>{moment(updateTime).format('YYYY-MM-DD HH:mm:ss')}</Col>
             </Row>
             {/* <Col style={{ position: 'absolute', top: 35, right: 0, transform: 'rotate(45deg)' }}><StatusIcon status={taskDetail?.calculationStatus} /></Col> */}
             {

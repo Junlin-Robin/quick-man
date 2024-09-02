@@ -53,7 +53,7 @@ export default function UploadDrawer(props: IProps) {
         const isSelected = e.target.checked || false;
         setIsSelectAll(isSelected);
         if (isSelected) {
-            setActionSelectList(data?.map((item) => item?.taskDetail?.id) || []);
+            setActionSelectList(data?.map((item) => item?.id) || []);
         } else {
             setActionSelectList([]);
         }
@@ -103,7 +103,7 @@ export default function UploadDrawer(props: IProps) {
 
     useEffect(() => {
         if (!isEmpty(data)) {
-            const isSelectAllTasks = isEqual(orderBy(actionSelectList), orderBy(data?.map((item) => item?.taskDetail?.id) || []));
+            const isSelectAllTasks = isEqual(orderBy(actionSelectList), orderBy(data?.map((item) => item?.id) || []));
             setIsSelectAll(isSelectAllTasks);
             if (!isEmpty(actionSelectList) && !isSelectAllTasks) setIndeterminate(true);
             else setIndeterminate(false);
@@ -178,8 +178,13 @@ export default function UploadDrawer(props: IProps) {
                                 {
                                     data.map((item) => (
                                         <TaskCard
-                                            key={item?.taskDetail?.id}
-                                            taskDetail={item?.taskDetail}
+                                            key={item?.id}
+                                            taskId={item?.id}
+                                            taskName={item?.name}
+                                            calculationStatus={item?.calculationStatus}
+                                            createTime={item?.createTime}
+                                            updateTime={item?.updateTime}
+                                            // isPhonon={item?.isPhonon}
                                             isAction={isAction}
                                             fileInfoList={item?.fileInfoList}
                                             onSelect={setActionSelectList}
@@ -187,7 +192,7 @@ export default function UploadDrawer(props: IProps) {
                                             onEdit={() => {
                                                 setOpen(true);
                                                 setIsEdit(true);
-                                                setTaskId(item?.taskDetail?.id);
+                                                setTaskId(item?.id);
                                             }}
                                         />
                                     ))
