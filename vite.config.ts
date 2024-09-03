@@ -19,15 +19,15 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       chunkSplitPlugin({
-        // strategy: 'default',
-        customSplitting: {
-          'react-vendor': [/react/, /react-dom/],
-          'lodash-vendor': [/lodash/],
-          'antd-vendor': [/antd/],
-          'antv-vendor': [/@ant-design\/charts/, /@ant-design\/plots/, /@antv/],
-          'decimal-vendor': [/decimal\.js/],
-          'other-vendor': [/node_modules/],
-        },
+        strategy: 'default',
+        // customSplitting: {
+        //   'react-vendor': [/react/, /react-dom/],
+        //   'lodash-vendor': [/lodash/],
+        //   'antd-vendor': [/antd/],
+        //   'antv-vendor': [/@ant-design\/charts/, /@ant-design\/plots/, /@antv/],
+        //   'decimal-vendor': [/decimal\.js/],
+        //   'other-vendor': [/node_modules/],
+        // },
       }),
     ],
     build: {
