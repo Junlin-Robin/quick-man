@@ -48,7 +48,6 @@ jobs:
           TARGET_FOLDER=$(grep 'REACT_DEV_URL_BASE' .env.$ENV | cut -d '=' -f2)/$SUFFIX_URL
           echo "TARGET_FOLDER=$TARGET_FOLDER" >> $GITHUB_ENV
           echo "部署分支路径为：$(grep 'REACT_DEV_URL_BASE' .env.$ENV | cut -d '=' -f2)/$SUFFIX_URL"
-          echo "::set-output name=TARGET_FOLDE::$TARGET_FOLDE"
 
           echo "-------------------------------------------------------------"
 
@@ -58,7 +57,7 @@ jobs:
 
           echo "📦 开始对 vite 项目打包..."
 
-          yarn run build -- --mode $ENV
+          yarn run build --mode $ENV
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.3.3
@@ -78,6 +77,23 @@ jobs:
         with:
           fetch-depth: 0 # 确保获取所有历史以便正确部署
 
+      - name: Fetch ENV_PARAMS
+        run: |
+          # 测试环境
+          ENV=development
+
+          # 获取app名字
+          REACT_APP_NAME=$(grep 'REACT_APP_NAME' .env.$ENV | cut -d '=' -f2)
+          echo "REACT_APP_NAME=$REACT_APP_NAME" >> $GITHUB_ENV
+
+          # 获取base路径
+          REACT_DEV_URL_BASE=$(grep 'REACT_DEV_URL_BASE' .env.$ENV | cut -d '=' -f2)
+          echo "REACT_DEV_URL_BASE=$REACT_DEV_URL_BASE" >> $GITHUB_ENV
+
+          # 获取部署的 surge 域名
+          SURGE_DOMAIN=$(grep 'SURGE_DOMAIN' .env.$ENV | cut -d '=' -f2)
+          echo "SURGE_DOMAIN=$SURGE_DOMAIN" >> $GITHUB_ENV
+
       - name: Switch to gh-pages branch
         run: git checkout gh-pages
 
@@ -88,9 +104,16 @@ jobs:
         env:
           SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }} # 2025-05-19过期
         run: |
-          mkdir -p ./temp/quick-man
-          cp -r ./dev ./temp/quick-man
-          surge --project ./temp --domain junlin-robin.surge.sh
+          # 创建临时的temp/quick-man文件夹，保障suge域名下访问路径和github-pages一致
+          mkdir -p ./temp/${{ env.REACT_APP_NAME }}
+
+          # 复制dev开发目录打包文件到创建的文件夹下
+          cp -r ./${{ env.REACT_DEV_URL_BASE }} ./temp/${{ env.REACT_APP_NAME }}
+
+          # surge上传文件到 surge.sh 域名
+          surge --project ./temp --domain ${{ env.SURGE_DOMAIN }}
+
+          # 上传完成后删除临时的temp文件夹
           rm -rf ./temp
 
 
