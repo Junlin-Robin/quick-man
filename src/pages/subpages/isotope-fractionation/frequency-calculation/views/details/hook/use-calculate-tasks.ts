@@ -90,20 +90,9 @@ export default function useCalculateTasks(key: string) {
         const [{ calculatedTasks, isSuccess }] = await new Promise<{
             calculatedTasks: TaskDataType, isSuccess: boolean
         }[]>((res) => {
-            // calculateWorker.onmessage = (e) => {
-            //     res(e.data);
-            // };
-            const handleMessage = (e) => {
-                console.log('接受同位素计算消息', { info: e.data });
-                calculateWorker.removeEventListener('message', handleMessage)
+            calculateWorker.onmessage = (e) => {
                 res(e.data);
             };
-            calculateWorker.addEventListener('message', handleMessage);
-            // calculateWorker.postMessage({
-            //     waitToCalculateList: waitToCalculateIsotopeFractionationTasks,
-            //     calculateType: CALCULATION_SERVICE.ISOTOPE_FRACTIONATION,
-            //     TGradient: [temperature],
-            // });
         });
 
 
@@ -215,25 +204,23 @@ export default function useCalculateTasks(key: string) {
         console.log(2)
 
 
+        calculateWorker.postMessage([{
+            waitToCalculateList: waitToCalculateIsotopeFractionationTasks,
+            calculateType: CALCULATION_SERVICE.ISOTOPE_FRACTIONATION,
+            TGradient: [temperature],
+        }, {
+            waitToCalculateList: waitToCalculateForceConstantTasks,
+            calculateType: CALCULATION_SERVICE.FORCE_CONSTANT,
+        }]);
+
         const [{ calculatedTasks: ISOFractionationRes, isSuccess }, {calculatedTasks: yym, isSuccess: y}] = await new Promise<{
             calculatedTasks: TaskDataType, isSuccess: boolean
         }[]>((res) => {
-            const handleMessage = (e) => {
-                console.log('接受同位素计算消息', { info: e.data });
-                calculateWorker.removeEventListener('message', handleMessage)
+            calculateWorker.onmessage = (e) => {
                 res(e.data);
             };
-            calculateWorker.addEventListener('message', handleMessage);
-            calculateWorker.postMessage([{
-                waitToCalculateList: waitToCalculateIsotopeFractionationTasks,
-                calculateType: CALCULATION_SERVICE.ISOTOPE_FRACTIONATION,
-                TGradient: [temperature],
-            }, {
-                waitToCalculateList: waitToCalculateForceConstantTasks,
-                calculateType: CALCULATION_SERVICE.FORCE_CONSTANT,
-            }]);
+            
         });
-        console.log(3)
 
 
         // const allIsotopeFractionation = taskIdList.map((taskId) => {
@@ -242,7 +229,6 @@ export default function useCalculateTasks(key: string) {
         //     const exist = storageAllTasksInfo.find((item) => item.id === taskId);
         //     return exist?.isotopeFractionation?.find((i) => i.T.kelvin === temperature.kelvin);
         // });
-        console.log(4)
 
         // console.log({allIsotopeFractionation, ISOFractionationRes})
 
@@ -259,7 +245,6 @@ export default function useCalculateTasks(key: string) {
         // }
 
 
-        console.log(5)
 
 
         // const { calculatedTasks: yym, isSuccess } = await new Promise<{
@@ -281,9 +266,6 @@ export default function useCalculateTasks(key: string) {
         //     });
         // });
 
-        console.log(6)
-
-        console.log({ yym, alreadyCalculatedTasks })
 
 
         const newAllTasksInfo = storageAllTasksInfo.map((task) => {
