@@ -178,11 +178,13 @@ jobs:
         env:
           SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }} # 2025-05-19过期
         run: |
+          shopt -s extglob
+          
           # 创建临时的temp/quick-man文件夹，保障suge域名下访问路径和github-pages一致
           mkdir -p ./temp/${{ env.REACT_APP_NAME }}
 
           # 复制所有打包文件到创建的文件夹下，保障不覆盖开发分支代码
-          cp -r ./ ./temp/${{ env.REACT_APP_NAME }}
+          cp -r ./!(temp) ./temp/${{ env.REACT_APP_NAME }}
 
           # surge上传文件到 surge.sh 域名
           surge --project ./temp --domain ${{ env.SURGE_DOMAIN }}

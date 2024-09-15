@@ -100,6 +100,8 @@ jobs:
         env:
           SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }} # 2025-05-19过期
         run: |
+          shopt -s extglob
+
           # 创建临时的temp/quick-man文件夹，保障suge域名下访问路径和github-pages一致
           mkdir -p ./temp/${{ env.REACT_APP_NAME }}
 
