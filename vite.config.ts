@@ -19,15 +19,14 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       // chunkSplitPlugin({
-      //   // strategy: 'unbundle',
-      //   // customSplitting: {
-      //   //   'react-vendor': [/react/, /react-dom/],
-      //   //   'lodash-vendor': [/lodash/],
-      //   //   'antd-vendor': [/antd/],
-      //   //   'antv-vendor': [/@ant-design\/charts/, /@ant-design\/plots/, /@antv/],
-      //   //   'decimal-vendor': [/decimal\.js/],
-      //   //   'other-vendor': [/node_modules/],
-      //   // },
+      //   customSplitting: {
+      //     'react-vendor': [/react/, /react-dom/],
+      //     'lodash-vendor': [/lodash/],
+      //     'antd-vendor': [/antd/],
+      //     'antv-vendor': [/@ant-design\/charts/, /@ant-design\/plots/, /@antv/],
+      //     'decimal-vendor': [/decimal\.js/],
+      //     'other-vendor': [/node_modules/],
+      //   },
       // }),
     ],
     build: {

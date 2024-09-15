@@ -1,6 +1,6 @@
 import { SOFTERWARE_TYPE, TASK_CALCULATION_STATUS, FILE_UPLOAD_STATUS } from '../constants';
 import type { ReturnInfo, ReturnCellInfo } from '@/packages/castep/formatter';
-import type { IsotopeFractionationReturn } from '@/packages/castep/calculation/isotope-fractionation'
+import type { IsotopeFractionationReturn } from '@/packages/castep/calculation/isotope-fractionation/models'
 
 // export interface TaskDetail {
 //     name: string;
@@ -53,4 +53,12 @@ export type TaskDataType = Array<{
     isotopeSetting: ReturnCellInfo['isotopeSetting'];
     forceConstant?: string;
     isotopeFractionation?: IsotopeFractionationReturn;
+    fractionationFittingLine?: {
+        /**斜率 */
+        k: string;
+        /**截距 */
+        b: string;
+        /**置信度 */
+        r2: string;
+    }
 }>

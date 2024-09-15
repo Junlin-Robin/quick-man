@@ -84,7 +84,7 @@ export function useDealFileUpload(key: string) {
 
         try {
             const dataList = await getData(search);
-            setData(dataList);
+            setData(dataList || []);
         } catch (error) {
             message.error((error as Error)?.message || '获取任务失败！');
             setData([]);
@@ -100,12 +100,12 @@ export function useDealFileUpload(key: string) {
         }
 
         if (!id) {
-            message.error('系统错误，未设置id，请联系管理员！');
+            message.error('系统错误，未设置计算任务id，请联系管理员！');
             return false;
         }
 
         try {
-            await db.table(key)?.bulkDelete([...id]);
+            await db.table(key)?.bulkDelete(Array.isArray(id) ? id : [id]);
             return true;
         } catch (error) {
             return false;

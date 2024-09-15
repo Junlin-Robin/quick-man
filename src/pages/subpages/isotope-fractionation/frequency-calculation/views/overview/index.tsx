@@ -94,7 +94,9 @@ export default function FrequencyCalculation() {
     <>
       <PageHeader title="频率分馏计算" />
       <Space direction="vertical" style={{ width: '100%' }}>
-        <Alert message={<Marquee speed={30} delay={5}>{pageInfoText}</Marquee>} type="info" showIcon closable />
+        <Alert message={<Marquee speed={25} delay={3} pauseOnHover={true}>
+          <span style={{ marginRight: '200px' }}>{pageInfoText}</span>
+        </Marquee>} type="info" showIcon closable />
         <Row justify="space-between" gutter={12} wrap={false}>
           <Col flex={1}>
             <Input.Search placeholder="请输入工程名进行搜索" allowClear onSearch={(v) => {
@@ -129,10 +131,10 @@ export default function FrequencyCalculation() {
         title="新建工程"
         extra={(<Typography.Text type="secondary" style={{ maxWidth: md ? '' : '60vw' }} ellipsis>工程id：{projectId}</Typography.Text>)}
         placement={md ? 'right' : 'bottom'}
-        closable={false}
+        onClose={closeCreateDrawer}
         open={open}
         size="large"
-        height="75vh"
+        height="100vh"
         maskClosable={false}
         footer={renderDrawerFooter()}
       >

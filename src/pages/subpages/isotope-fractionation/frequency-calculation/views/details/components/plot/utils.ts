@@ -1,5 +1,7 @@
 import decimal from 'decimal.js';
 
+import { head } from 'lodash';
+
 import { CALCULATION_SERVICE } from '../../../../constants';
 
 import type { CalculationResults } from '../../models';
@@ -13,15 +15,17 @@ export function formatterData(dataSource: CalculationResults, type: CALCULATION_
         const fractionationData: IsotopeFractionationData[] = [];
         dataSource?.forEach((dataItem) => {
             const frequency = dataItem.frequencyInfo;
+            const name = dataItem.taskName;
+            const category = dataItem.taskId;
             const res = frequency?.map((i) => ({
                 fractionation: parseFloat(new decimal(i.fractionation).toFixed(4)),
                 temperature: parseFloat(decimal.div(decimal.pow(10, 6), decimal.pow(i.T.kelvin, 2)).toFixed(4)),
                 kelvin: i.T.kelvin,
                 celsius: i.T.celsius,
-                category: i.category,
-                name: i.name,
+                category,
+                name,
             })) || [];
-            //每个同位素追一个00值
+            //每个同位素追一个[0, 0]值
             fractionationData.push(...res, {
                 fractionation: 0,
                 temperature: 0,
@@ -36,11 +40,12 @@ export function formatterData(dataSource: CalculationResults, type: CALCULATION_
         const forceConstantData = dataSource?.map((dataItem) => {
             const forceConstant = dataItem.forceConstant;
             const frequency = dataItem.frequencyInfo;
+            console.log('111', {frequency, forceConstant})
             return {
                 category: dataItem.taskId,
                 name: dataItem.taskName,
                 forceConstant: parseFloat(new decimal(forceConstant || 0).toFixed(4)),
-                fractionation: parseFloat(new decimal(frequency?.[0]?.fractionation || 0).toFixed(4)),
+                fractionation: parseFloat(new decimal(head(frequency)?.fractionation ?? '0').toFixed(4))
             };
         });
         return forceConstantData.filter(Boolean);

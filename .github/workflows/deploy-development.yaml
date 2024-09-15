@@ -86,10 +86,6 @@ jobs:
           REACT_APP_NAME=$(grep 'REACT_APP_NAME' .env.$ENV | cut -d '=' -f2)
           echo "REACT_APP_NAME=$REACT_APP_NAME" >> $GITHUB_ENV
 
-          # 获取base路径
-          REACT_DEV_URL_BASE=$(grep 'REACT_DEV_URL_BASE' .env.$ENV | cut -d '=' -f2)
-          echo "REACT_DEV_URL_BASE=$REACT_DEV_URL_BASE" >> $GITHUB_ENV
-
           # 获取部署的 surge 域名
           SURGE_DOMAIN=$(grep 'SURGE_DOMAIN' .env.$ENV | cut -d '=' -f2)
           echo "SURGE_DOMAIN=$SURGE_DOMAIN" >> $GITHUB_ENV
@@ -107,8 +103,8 @@ jobs:
           # 创建临时的temp/quick-man文件夹，保障suge域名下访问路径和github-pages一致
           mkdir -p ./temp/${{ env.REACT_APP_NAME }}
 
-          # 复制dev开发目录打包文件到创建的文件夹下
-          cp -r ./${{ env.REACT_DEV_URL_BASE }} ./temp/${{ env.REACT_APP_NAME }}
+          # 复制所有打包文件到创建的文件夹下，保障不覆盖线上分支代码
+          cp -r ./ ./temp/${{ env.REACT_APP_NAME }}
 
           # surge上传文件到 surge.sh 域名
           surge --project ./temp --domain ${{ env.SURGE_DOMAIN }}

@@ -10,6 +10,7 @@ import {
 import { judgeIsSupport, judgeIsCalculateRaman, judgeIsCalculatePhonon } from './judgement';
 
 import { isNil, last } from 'lodash';
+import decimal from 'decimal.js';
 
 export interface ReturnInfo {
     frequency: string[][];
@@ -29,23 +30,48 @@ function formatterFrequencyInfo(text: string, isPhonon: boolean) {
     const regexProportionInfo = text.match(regexVibrationFrequencyProportions) || [];
 
     // const q_pt_indexList = regexProportionInfo.map((infoItem) => infoItem.split(/\s+/)?.[2]);
-    let q_pt_head = '0';
+    // let q_pt_head = '0';
+    // const _proportions: string[][] = [];
     //获取频率的比例信息
     /**
      * 这里取平均值，继续改
      */
-    const proportions = regexProportionInfo.map((infoItem) => {
+    const _proportions = regexProportionInfo.map((infoItem) => {
         const q_pt_index = infoItem.split(/\s+/)?.[2];
-        if (q_pt_index && q_pt_index !== q_pt_head) {
-            const proportion = last(infoItem.split(/\s+/));
-            q_pt_head = q_pt_index;
-            return proportion;
-        }
-        const proportion = '0';
-        return proportion;
+        const proportion = last(infoItem.split(/\s+/)) || '';
+        // if (q_pt_index && q_pt_index !== q_pt_head) {
+        //     const proportion = last(infoItem.split(/\s+/));
+        //     q_pt_head = q_pt_index;
+        //     return proportion;
+        // }
+        // const proportion = '0';
+        // return proportion;
+
+        return ({
+            index: q_pt_index,
+            proportion,
+        })
+
+        // const index = Number(q_pt_index);
+        // _proportions[index] =  _proportions[index] ? [..._proportions[index], proportion] : [proportion];
     }); 
+    const map = new Map();
+    _proportions.forEach((i) => {
+        map.set(i.index, map.has(i.index) ? [...map.get(i.index), i.proportion] : [i.proportion]);
+    });
+    const proportions = _proportions.map((i) => {
+        const mapValue = map.get(i.index) || [];
+        const average = decimal.div(i.proportion, mapValue?.length || 1).toString();
+        console.log({mapValue, index: i.index, average})
+        return average;
+    })
+    const a = _proportions.map((item) => item.proportion)
+    console.log({proportions, _proportions, a}, a.reduce((cur, acc) => decimal.add(cur, acc).toString()), proportions.reduce((cur, acc) => decimal.add(cur, acc).toString()), proportions.join(','))
+    // const proportions = _proportions.filter(Boolean).map((item) => decimal.sum(...item).div(item.length).toString());
     //获取所有的频率矩阵信息
     const vibrationFrequencyMatchMatrix_All = text.match(isPhonon ? regexPhononVibrationFrequencyMatrix : regexGammaVibrationFrequencyMatrix) || []; //匹配数组
+
+    console.log({vibrationFrequencyMatchMatrix_All, _proportions})
 
     if (vibrationFrequencyMatchMatrix_All.length % proportions.length !== 0) throw new Error('频率比例信息正则匹配出错，轻检查文件或者联系管理员～');
 

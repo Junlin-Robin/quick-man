@@ -50,9 +50,8 @@ export default function Sider(props: Iprops) {
         className={styles['slider']}
         collapsible={!isLargerThanMinWidth}
         collapsed={collapsed}
-        // breakpoint="md"
         collapsedWidth={'100vw'}
-        width={isLargerThanMinWidth ? 150 : '100vw'}
+        width={(isLargerThanMinWidth ?? true) ? 150 : '100vw'}
         style={{
           overflow: "auto",
           height: isLargerThanMinWidth ? "calc(100vh - 64px)" : (collapsed ? '0' : '100px'),

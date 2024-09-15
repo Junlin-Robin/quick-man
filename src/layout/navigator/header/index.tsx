@@ -82,8 +82,8 @@ export default function Header(props: IProps) {
 
     return (
         <>
-            <Row justify="space-between" wrap={false} align="middle">
-                <Col>
+            <Row wrap={false} align="middle">
+                <Col flex={1}>
                     <Space align="center">
                         {
                             !isLargerThanMinWidth && (
@@ -106,7 +106,7 @@ export default function Header(props: IProps) {
                     </Space>
                 </Col>
                 <Col style={{ height: '64px' }}>
-                    <Space>
+                    <Space align='center'>
                         {/* 补充多页面链接 */}
                         <Dropdown menu={{ items }}>
                             <Space onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} style={{
@@ -118,7 +118,9 @@ export default function Header(props: IProps) {
                                 <Avatar size={30}>
                                     <UserOutlined />
                                 </Avatar>
-                                <Typography.Text type='secondary' ellipsis style={{ fontSize: 15, lineHeight: '60px', fontWeight: 400 }}>admin</Typography.Text>
+                                {
+                                    isLargerThanMinWidth && <Typography.Text type='secondary' ellipsis style={{ fontSize: 15, lineHeight: '60px', fontWeight: 400 }}>admin</Typography.Text>
+                                }
                             </Space>
                         </Dropdown>
                     </Space>

@@ -7,7 +7,7 @@ const warningMessage = '当前浏览器不支持获取系统主题色，请使�
 
 export default function useWatchSystemTheme() {
     //系统主题色
-    const [theme, setTheme] = useState<'light' | 'dark'>('light');
+    const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>('light');
 
     const checkBrowserSupport = useMemoizedFn(() => {
         if (!window.matchMedia) {
@@ -22,7 +22,7 @@ export default function useWatchSystemTheme() {
 
     const handleSystemThemeChange = useMemoizedFn(() => {
         const matchResult = query.matches;
-        setTheme(matchResult ? 'dark' : 'light');
+        setSystemTheme(matchResult ? 'dark' : 'light');
     });
 
     useEffect(() => {
@@ -38,5 +38,5 @@ export default function useWatchSystemTheme() {
     }, [checkBrowserSupport, handleSystemThemeChange, query]);
 
 
-    return theme;
+    return systemTheme;
 }

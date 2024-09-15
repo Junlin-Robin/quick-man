@@ -94,6 +94,8 @@ export default function FileUpload(props: IProps) {
     const [isDisabled, setIsDisabled] = useState(false);
     const [taskItem, setTaskItem] = useState<TaskDataType[number] | undefined>();
 
+    const [loading, setLoading] = useState(false);
+
     useEffect(() => {
         const specificTask = data?.find((item) => item?.id === editTaskId);
         setTaskItem(specificTask);
@@ -143,6 +145,7 @@ export default function FileUpload(props: IProps) {
     const submit = useMemoizedFn(async () => {
         //首先检测form必填项目
         await form.validateFields();
+        setLoading(true);
         if (isEdit && isDisabled) {
             try {
                 const isSuccess = await createOrModifiedData?.({
@@ -180,10 +183,6 @@ export default function FileUpload(props: IProps) {
             const isPhonon_heavy = judgeIsCalculatePhonon(heavyFile?.text || '');
             const isPhonon_light = judgeIsCalculatePhonon(lightFile?.text || '');
             if (isPhonon_heavy !== isPhonon_light) throw new Error('轻、重同位素 .castep 文件计算设置不一致，请仔细检查文件');
-            // /**
-            //  * 这里后续补齐，去掉这个校验
-            //  */
-            // if (isPhonon_heavy) throw new Error('暂不支持计算声子频率，敬请期待～');
             //计算任务名字
             const name = form.getFieldValue('taskName') || '';
             const taskId = isEdit ? editTaskId : nanoid();
@@ -191,11 +190,6 @@ export default function FileUpload(props: IProps) {
             const isSuccess = await createOrModifiedData?.({
                 name,
                 id: taskId,
-                // fileInfo: {
-                //     heavy: heavyFile?.fileList || [],
-                //     light: lightFile?.fileList || [],
-                //     cell: cellFile?.fileList || [],
-                // },
                 calculationStatus: TASK_CALCULATION_STATUS.WAITING,
                 createTime: isEdit ? (taskItem?.createTime ?? Date.now()) : Date.now(),
                 updateTime: Date.now(),
@@ -210,23 +204,6 @@ export default function FileUpload(props: IProps) {
                 },
                 heavyFreqInfo: heavyFile?.info || [],
                 lightFreqInfo: lightFile?.info || [],
-                // taskDetail: {
-                //     name,
-                //     id: taskId,
-                //     isFixed,
-                //     createTime: isEdit ? (taskItem?.taskDetail?.createTime ?? Date.now()) : Date.now(),
-                //     updateTime: Date.now(),
-                //     calculationStatus: TASK_CALCULATION_STATUS.WAITING,
-                //     calculationParams: {
-                //         softWare: SOFTERWARE_TYPE.CASTEP,
-                //         isPhonon: isPhonon_heavy,
-                //         frequencyInfo: {
-                //             heavy: heavyFile?.info || [],
-                //             light: lightFile?.info || [],
-                //         },
-                //         cellInfo: cellInfo,
-                //     },
-                // },
                 fileInfoList: {
                     heavy: heavyFile?.fileList || [],
                     light: lightFile?.fileList || [],
@@ -238,6 +215,8 @@ export default function FileUpload(props: IProps) {
             close?.();
         } catch (error) {
             message.error((error as Error).message || '创建计算任务失败！');
+        } finally {
+            setLoading(false);
         }
     });
 
@@ -255,8 +234,8 @@ export default function FileUpload(props: IProps) {
                     </Space>
                 )}
                 actions={[
-                    (<Button block size='large' style={{ width: '80%' }} onClick={close}>取消</Button>),
-                    (<Button type="primary" block size='large' style={{ width: '80%' }} onClick={() => form?.submit()}>确认</Button>),
+                    (<Button block size='large' style={{ width: '80%' }} onClick={close} disabled={loading}>取消</Button>),
+                    (<Button type="primary" block size='large' style={{ width: '80%' }} onClick={() => form?.submit()} loading={loading}>确认</Button>),
                 ]}
                 styles={{
                     body: {

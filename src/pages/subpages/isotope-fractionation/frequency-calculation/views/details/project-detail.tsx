@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Card, Space, Button, Form, Segmented, message, Row,
+  InputNumber, Input,
 } from 'antd';
 import { useMemoizedFn } from 'ahooks';
 import PageHeader from '@/pages/components/page-header';
@@ -25,6 +26,7 @@ import { projectDetailState } from './constants/atoms';
  * 兼容写法，跨模块引用
  */
 import type { ProjectListType } from '../overview/hooks/use-operate-project';
+import decimal from 'decimal.js';
 
 
 /**
@@ -90,7 +92,10 @@ export default function ProjectDetail(props: { id: string }) {
 
   useUpdateEffect(() => {
     if (!open) {
-      triggerGetData?.();
+      const alreadySelectedTaskIds = form.getFieldValue('taskIds') || [];
+      const filterSelecteTaskids = alreadySelectedTaskIds.filter((i: string) => taskOptions.some((o) => o.value === i));
+      form.setFieldValue('taskIds', filterSelecteTaskids);
+      setCalculationResults([]);
       form.submit();
     }
   }, [open]);
@@ -131,23 +136,36 @@ export default function ProjectDetail(props: { id: string }) {
 
 
   const submit = useMemoizedFn(async () => {
-    const selectedDataIds: string[] = form.getFieldValue('taskIds') || [];
+    await form.validateFields();
+    const { taskIds = [], temperature_gradient, temperature } = form.getFieldsValue(true);
     if (calculationType === CALCULATION_SERVICE.ISOTOPE_FRACTIONATION) {
+      const TGradient = temperature_gradient?.match(/\d+(\.\d+)?/g)
+        ?.sort((a: string, b: string) => decimal.sub(a, b).valueOf())
+        .map((item: string) => ({
+          kelvin: item,
+          celsius: decimal.sub(item, '273.15').toString(),
+        })) || [];
       try {
-        const isSuccess = await calculateAndSaveFrequency(selectedDataIds);
+        const isSuccess = await calculateAndSaveFrequency({ taskIdList: taskIds, TGradient });
         if (isSuccess) message.success('计算成功！')
       } catch (error) {
-        message.error((error as Error)?.message || '同位素分馏计算失败，请检查上传文件是否正确！')
+        message.error((error as Error)?.message || '同位素分馏计算失败，请检查上传文件是否正确！');
       }
     } else if (calculationType === CALCULATION_SERVICE.FORCE_CONSTANT) {
+      const formattTemperature = { kelvin: String(temperature), celsius: decimal.sub(temperature, 273.15).toString() }
       try {
-        const isSuccess = await calculateAndSaveForceConstant(selectedDataIds);
+        const isSuccess = await calculateAndSaveForceConstant({
+          taskIdList: taskIds,
+          temperature: formattTemperature,
+        });
         if (isSuccess) message.success('计算成功！')
       } catch (error) {
         message.error((error as Error)?.message || '力常数计算失败，请检查上传文件是否正确！')
       }
     }
   });
+
+  useEffect(() => { console.log({ calculationResults }) }, [calculationResults])
 
 
   return (
@@ -161,17 +179,21 @@ export default function ProjectDetail(props: { id: string }) {
           <Segmented options={calculationServiceOptions} value={calculationType} onChange={(v) => setCalculationType(v)} />
         }>
           <Form form={form} colon onFinish={submit} onReset={reset} layout='horizontal' preserve={false}>
-            <Form.Item label="项目名字" name="taskIds" rules={[{ required: true, message: '必须有项目名字' }]}>
-              <CascaderPro allowClear placeholder="请输入项目名" options={taskOptions} loading={loading} />
+            <Form.Item label="项目名字" name="taskIds" rules={[{ required: true, message: '至少选择一个任务' }]}>
+              <CascaderPro allowClear placeholder="请选择需要计算的任务" options={taskOptions} loading={loading} />
             </Form.Item>
             {
               calculationType === 1 ? (
-                <Form.Item label="温度梯度" name="temperature_d">
-                  <CascaderPro allowClear placeholder="请输入项目名" options={taskOptions} loading={loading} />
+                <Form.Item
+                  label="温度梯度"
+                  name="temperature_gradient"
+                  rules={[{ required: true, message: '温度梯度不能为空' }]}
+                  initialValue='273.15；298.15；303.15；333.15；373.15；400；500；600；700；800；900；1000'>
+                  <Input placeholder="请输入需要计算的温度梯度，以逗号分隔，单位为开尔文温度" style={{ width: '100%' }} addonAfter="K" />
                 </Form.Item>
               ) : (
-                <Form.Item label="温度选择" name="tem">
-                  <CascaderPro allowClear placeholder="请输入项目名" options={taskOptions} loading={loading} />
+                <Form.Item label="温度选择" name="temperature" rules={[{ required: true, message: '温度设置不能为空' }]} initialValue={273.15}>
+                  <InputNumber addonAfter="K" placeholder='请填写需要对比的同位素分馏温度，用于作图显示，单位为开尔文温度' style={{ width: '100%' }} />
                 </Form.Item>
               )
             }

@@ -136,12 +136,12 @@ export default function UploadDrawer(props: IProps) {
                 open={visible}
                 onClose={handleClose}
                 placement={md ? 'right' : 'bottom'}
-                height="70vh"
+                height="100vh"
                 maskClosable={false}
                 extra={(
                     <>
                         <Tooltip title={() => BatchCreateTaskDescription.split('\n').map((item) => <p style={{ textAlign: 'justify' }}>{item}</p>)}>
-                            <Button type="link" onClick={() => message.warning('功能正在开发中，敬请期待～')}>批量上传
+                            <Button type="link" onClick={() => message.warning('功能正在开发中，敬请期待～')} disabled>批量上传
                                 <QuestionCircleOutlined />
                             </Button>
                         </Tooltip>
@@ -205,7 +205,7 @@ export default function UploadDrawer(props: IProps) {
                     </Tooltip>
                 </Spin>
             </Drawer>
-            <Modal open={open} footer={null} getContainer={() => document.getElementsByClassName('ant-drawer-body')?.[0] as HTMLElement} closeIcon={null} destroyOnClose centered>
+            <Modal open={open} footer={null} closeIcon={null} destroyOnClose centered>
                 <FileUpload taskId={taskId} close={closeModal} isEdit={isEdit} />
             </Modal>
         </>

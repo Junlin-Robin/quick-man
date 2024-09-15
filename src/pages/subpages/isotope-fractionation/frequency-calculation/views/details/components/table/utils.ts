@@ -40,9 +40,9 @@ export function formatterData(dataSource: CalculationResults, type: CALCULATION_
                 const kelvin = info.T.kelvin;
                 const thousand_div_T = decimal.div(1000, kelvin).toFixed(4);
                 const thousand_div_T_square = decimal.div(1000000, decimal.pow(kelvin, 2)).toFixed(4);
-                const beta = new decimal(info.beta).toFixed(4);
+                const beta = new decimal(info.normalizedBeta).toFixed(4);
                 const fractionation = new decimal(info.fractionation).toFixed(4);
-                const thousand_Beta_minor = decimal.sub(beta, 1).mul(1000).toFixed(4);
+                const thousand_Beta_minor = new decimal(info.thousand_BetaMinor).toFixed(4);
                 const overViewItem = overviewData.find((data) => data.taskId === id);
                 fractionationData.push({
                     ...overViewItem! || {},

@@ -9,12 +9,10 @@ export interface ForceConstantParams {
         heavy: string[][];
         light: string[][];
     };
-    cell: {
-        isotopeNumber: number;
-        massSetting: {
-            heavy: string;
-            light: string;
-        };
+    isotopeNumber: number;
+    massSetting: {
+        heavy: string;
+        light: string;
     };
     proportions: string[];
 }
@@ -22,9 +20,8 @@ export function calculateForceConstantFromFrequency(params: ForceConstantParams)
 export function calculateForceConstantFromFrequency(params: ForceConstantParams[]): Promise<{ forceConstant: string }[]>
 export function calculateForceConstantFromFrequency(params: ForceConstantParams | ForceConstantParams[]) {
     if (Array.isArray(params)) return Promise.all(params.map((param) => calculateForceConstantFromFrequency(param)));
-    const { freq, cell, proportions } = params;
+    const { freq, isotopeNumber, massSetting, proportions } = params;
     const { heavy: waveNumber_heavy_arr, light: waveNumber_light_arr } = freq || {};
-    const { isotopeNumber, massSetting } = cell || {};
 
     if (waveNumber_heavy_arr?.length !== waveNumber_light_arr?.length) throw new Error('波数数组长度不一致！');
     if (waveNumber_heavy_arr?.length !== proportions?.length) throw new Error('波数数组长度不一致！');

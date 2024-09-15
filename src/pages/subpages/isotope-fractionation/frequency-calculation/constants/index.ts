@@ -100,7 +100,7 @@ export const INITIAL_DATA_BASE_VERSION = 1;
  */
 // export const DATA_BASE_INDEX = 'id, name, file_info, calculation_status, create_time, update_time, is_fixed, soft_ware, is_phonon, heavy_freq_info, light_freq_info, cell_info, isotope_setting, force_constant_result, isotope_fractionation_result';
 
-export const DATA_BASE_INDEX = 'id, name, fileInfoList, calculationStatus, createTime, updateTime, isFixed, softWare, isPhonon, heavyFreqInfo, lightFreqInfo, cellInfo, isotopeSetting, forceConstant, isotopeFractionation';
+export const DATA_BASE_INDEX = 'id, name, fileInfoList, calculationStatus, createTime, updateTime, isFixed, softWare, isPhonon, heavyFreqInfo, lightFreqInfo, cellInfo, isotopeSetting, forceConstant, isotopeFractionation, fractionationFittingLine';
 
 export const DATABASEINDEXMAP = {
     id: 'id',

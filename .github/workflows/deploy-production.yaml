@@ -145,3 +145,47 @@ jobs:
           target-folder: / # 部署根目录
           clean: true # 先清理之前的部署
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-to-surge-page:
+    runs-on: ubuntu-latest
+    needs: deploy-in-development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # 确保获取所有历史以便正确部署
+
+      - name: Fetch ENV_PARAMS
+        run: |
+          # 测试环境
+          ENV=production
+
+          # 获取app名字
+          REACT_APP_NAME=$(grep 'REACT_APP_NAME' .env.$ENV | cut -d '=' -f2)
+          echo "REACT_APP_NAME=$REACT_APP_NAME" >> $GITHUB_ENV
+
+          # 获取部署的 surge 域名
+          SURGE_DOMAIN=$(grep 'SURGE_DOMAIN' .env.$ENV | cut -d '=' -f2)
+          echo "SURGE_DOMAIN=$SURGE_DOMAIN" >> $GITHUB_ENV
+
+      - name: Switch to gh-pages branch
+        run: git checkout gh-pages
+
+      - name: install surge
+        run: yarn global add surge
+      
+      - name: publish production pages
+        env:
+          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }} # 2025-05-19过期
+        run: |
+          # 创建临时的temp/quick-man文件夹，保障suge域名下访问路径和github-pages一致
+          mkdir -p ./temp/${{ env.REACT_APP_NAME }}
+
+          # 复制所有打包文件到创建的文件夹下，保障不覆盖开发分支代码
+          cp -r ./ ./temp/${{ env.REACT_APP_NAME }}
+
+          # surge上传文件到 surge.sh 域名
+          surge --project ./temp --domain ${{ env.SURGE_DOMAIN }}
+
+          # 上传完成后删除临时的temp文件夹
+          rm -rf ./temp

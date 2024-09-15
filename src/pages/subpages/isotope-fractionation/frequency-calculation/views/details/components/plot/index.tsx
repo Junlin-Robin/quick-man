@@ -22,7 +22,7 @@ import decimal from 'decimal.js';
 interface IProps {
     dataSource: CalculationResults;
     type: CALCULATION_SERVICE;
-    loading: boolean
+    loading: boolean;
 }
 
 export default function FrequencyPlotCard(props: IProps) {
@@ -36,7 +36,8 @@ export default function FrequencyPlotCard(props: IProps) {
 
     const titleText = useMemo(() => `${CalculationServiceMap[type] || ''}-趋势图`, [type]);
 
-    const formattered = useMemo(() => formatterData(dataSource, type), [type, dataSource]);
+    const formattered = useMemo(() => formatterData(dataSource, type), [dataSource, type]);
+
 
     const [regress, setRegres] = useState<{
         m: number;
@@ -52,27 +53,28 @@ export default function FrequencyPlotCard(props: IProps) {
         axis: {
             x: {
                 title: ('10⁶/T²（K⁻²）'), titleSpacing: 10, gridStrokeOpacity: 0.25
-            }, 
+            },
             y: {
-                title: '1000lnβ（‰）', titleSpacing: 10, gridStrokeOpacity: 0.25
+                title: '1000lnβ（‰）', titleSpacing: isLargerThanMinWidth ? 10 : 0, gridStrokeOpacity: 0.25
             },
         }, //轴标题
         seriesField: 'name',
         colorField: 'name',
-        slider: isLargerThanMinWidth ? {
-            x: true,
-            y: true,
-        } : undefined,
-        tooltip: {
+        shape: 'smooth',
+        slider: {
+            x: isLargerThanMinWidth,
+            y: isLargerThanMinWidth,
+        },
+        tooltip: isLargerThanMinWidth ? {
             title: (text: IsotopeFractionationData) => `温度：${text.kelvin}（K） ${text.celsius}（°C）`,
             items: [(text: IsotopeFractionationData) => `1000lnβ：${text.fractionation}（‰）`],
-        },
+        } : null,
         theme,
         scale: {
-            x: { nice: true, domain: [0, 14], tickCount: 14 },
+            x: { nice: true },
             y: { nice: true },
         },
-        interaction: { brushFilter: true },
+        interaction: { brushFilter: isLargerThanMinWidth },
         sizeField: 2,
     };
 
@@ -111,19 +113,19 @@ export default function FrequencyPlotCard(props: IProps) {
         data: formattered,
         xField: 'forceConstant',
         yField: 'fractionation',
-        slider: isLargerThanMinWidth ? {
-            x: true,
-            y: true,
-        } : undefined,
+        slider: {
+            x: isLargerThanMinWidth,
+            y: isLargerThanMinWidth,
+        },
         theme,
         axis: { x: { title: 'Force Constant <F> (N/m)', titleSpacing: 10, gridStrokeOpacity: 0.25 }, y: { title: '1000lnβ（‰）', titleSpacing: 10, gridStrokeOpacity: 0.25 } }, //轴标题
         seriesField: 'name',
         colorField: 'name',
         shapeField: 'point',
-        tooltip: {
+        tooltip: isLargerThanMinWidth ? {
             title: (text: ForceConstantData) => `${text.name} `,
             items: [(text: ForceConstantData) => `1000lnβ：${text.fractionation}（‰）`, (text: ForceConstantData) => `力常数：${text.forceConstant}（N/m）`],
-        },
+        } : null,
         label: {
             text: 'name',
             transform: [{ type: 'overlapDodgeY' }],
@@ -156,7 +158,7 @@ export default function FrequencyPlotCard(props: IProps) {
                 }
             ],
         },
-        interaction: { brushFilter: true },
+        interaction: { brushFilter: isLargerThanMinWidth },
         style: { fillOpacity: 0.3, lineWidth: 1 },
     };
 
@@ -187,7 +189,8 @@ export default function FrequencyPlotCard(props: IProps) {
                 title={titleText}
                 styles={{
                     body: {
-                        minHeight: '450px'
+                        minHeight: '450px',
+                        padding: isLargerThanMinWidth ? undefined : 2,
                     }
                 }}
                 extra={

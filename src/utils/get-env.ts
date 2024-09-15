@@ -9,7 +9,8 @@ export const isProd = import.meta.env.REACT_APP_ENV === 'production';
  * @returns 当前环境
  */
 export const getEnv = () => {
-    switch (process?.env?.REACT_APP_ENV) {
+    const env = import.meta.env.REACT_APP_ENV;
+    switch (env) {
         case 'staging':
             return 'staging';
         case 'production':

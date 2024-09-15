@@ -11,7 +11,7 @@ export default function Footer(props: Iprops) {
   return (
     <Layout.Footer style={{ ...style }} className={className}>
       <div style={{ width: '100%', textAlign: 'center', fontSize: '13px', fontWeight: 320, lineHeight: '26px' }}>
-        Design by <a href="https://github.com/Junlin-Robin/quick-man">Junlin-W</a>
+        Design by <a href="https://github.com/Junlin-Robin/quick-man" target="_blank">Junlin-W</a>
         <br />
         管理员：<a href="mailto:2239520855@qq.com">Zhuofan</a>
         <br />
