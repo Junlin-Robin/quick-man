@@ -3,8 +3,6 @@ import { isEmpty } from "lodash";
 import ProjectCard from "./project-card";
 import type { FormType } from '../project-form/type';
 
-import QueueAnim from 'rc-queue-anim';
-
 interface Props {
     projectList: (FormType & { id: string; createTime: number; updateTime?: number })[];
     deleteProject: (id: string) => void
