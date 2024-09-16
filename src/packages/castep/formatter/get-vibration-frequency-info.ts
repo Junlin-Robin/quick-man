@@ -22,56 +22,38 @@ export interface ReturnInfo {
 }
 
 /**
- * 
- * @param text 
+ * 格式化castep频率信息
+ * @param text 输入的castep文本
  * @returns 
  */
 function formatterFrequencyInfo(text: string, isPhonon: boolean) {
     const regexProportionInfo = text.match(regexVibrationFrequencyProportions) || [];
 
-    // const q_pt_indexList = regexProportionInfo.map((infoItem) => infoItem.split(/\s+/)?.[2]);
-    // let q_pt_head = '0';
-    // const _proportions: string[][] = [];
-    //获取频率的比例信息
-    /**
-     * 这里取平均值，继续改
-     */
+    //获取所有输出的频率信息
     const _proportions = regexProportionInfo.map((infoItem) => {
         const q_pt_index = infoItem.split(/\s+/)?.[2];
         const proportion = last(infoItem.split(/\s+/)) || '';
-        // if (q_pt_index && q_pt_index !== q_pt_head) {
-        //     const proportion = last(infoItem.split(/\s+/));
-        //     q_pt_head = q_pt_index;
-        //     return proportion;
-        // }
-        // const proportion = '0';
-        // return proportion;
 
         return ({
             index: q_pt_index,
             proportion,
         })
 
-        // const index = Number(q_pt_index);
-        // _proportions[index] =  _proportions[index] ? [..._proportions[index], proportion] : [proportion];
     }); 
+
+    //准备map数据，用于过滤同一个q-point点计算多次的行为
     const map = new Map();
     _proportions.forEach((i) => {
         map.set(i.index, map.has(i.index) ? [...map.get(i.index), i.proportion] : [i.proportion]);
     });
     const proportions = _proportions.map((i) => {
         const mapValue = map.get(i.index) || [];
+        //取平均
         const average = decimal.div(i.proportion, mapValue?.length || 1).toString();
-        console.log({mapValue, index: i.index, average})
         return average;
-    })
-    const a = _proportions.map((item) => item.proportion)
-    console.log({proportions, _proportions, a}, a.reduce((cur, acc) => decimal.add(cur, acc).toString()), proportions.reduce((cur, acc) => decimal.add(cur, acc).toString()), proportions.join(','))
-    // const proportions = _proportions.filter(Boolean).map((item) => decimal.sum(...item).div(item.length).toString());
+    });
     //获取所有的频率矩阵信息
     const vibrationFrequencyMatchMatrix_All = text.match(isPhonon ? regexPhononVibrationFrequencyMatrix : regexGammaVibrationFrequencyMatrix) || []; //匹配数组
-
-    console.log({vibrationFrequencyMatchMatrix_All, _proportions})
 
     if (vibrationFrequencyMatchMatrix_All.length % proportions.length !== 0) throw new Error('频率比例信息正则匹配出错，轻检查文件或者联系管理员～');
 
@@ -134,44 +116,6 @@ export function getVibrationFrequencyInfo(text: string | string[]) {
 
         //判断计算类型是否是声子频率
         const isPhonon = judgeIsCalculatePhonon(text);
-
-        // /**
-        // * 声子频率处理方式，待补充！！！！！！！！
-        // * ！！！！！！！1
-        // * ！！！！！！！
-        // */
-        // if (isPhonon) {
-        //     const ress = text.match(regexPhononVibrationFrequencyMatrix);
-        //     // for (const res of ress) {
-        //     //     console.log('aa', res[1])
-
-        //     // }
-        //     console.log({ ress })
-        //     // rej(new Error('不支持声子'));
-        // }
-
-
-        // //获取频率矩阵信息
-        // const vibrationFrequencyMatchMatrix = text.match(regexGammaVibrationFrequencyMatrix) || []; //匹配数组
-        // console.log({ vibrationFrequencyMatchMatrix })
-        // const isCalculateRaman = judgeIsCalculateRaman(text); //判断是否计算了拉曼频率
-        // const FILTER_VIBRATION_FREQUENCY_TABLE_HEADERS = isCalculateRaman ?
-        //     VIBRATION_FREQUENCY_TABLE_HEADERS :
-        //     VIBRATION_FREQUENCY_TABLE_HEADERS.filter((header) => header !== VIBRATION_FREQUENCY_TABLE_HEADERS_ENUM.RAMAN);
-        // const vibrationFrequencyMatrixMap: Map<string, string[]> = new Map(FILTER_VIBRATION_FREQUENCY_TABLE_HEADERS.map((key) => [key, []]));
-        // vibrationFrequencyMatchMatrix.forEach((item) => {
-        //     const itemInfo = item.split(/\s+/).filter((v) => v !== '+');
-        //     FILTER_VIBRATION_FREQUENCY_TABLE_HEADERS.forEach((key, index) => {
-        //         const keyValue = vibrationFrequencyMatrixMap.get(key) || [];
-        //         vibrationFrequencyMatrixMap.set(key, [...keyValue, itemInfo[index]]);
-        //     });
-        // })
-
-        // const FREQUENCY = vibrationFrequencyMatrixMap.get(VIBRATION_FREQUENCY_TABLE_HEADERS_ENUM.FREQUENCY) || [];
-        // const IR = vibrationFrequencyMatrixMap.get(VIBRATION_FREQUENCY_TABLE_HEADERS_ENUM.IR) || [];
-        // const IR_ACTIVE = vibrationFrequencyMatrixMap.get(VIBRATION_FREQUENCY_TABLE_HEADERS_ENUM.IR_ACTIVE) || [];
-        // const RAMAN = vibrationFrequencyMatrixMap.get(VIBRATION_FREQUENCY_TABLE_HEADERS_ENUM.RAMAN) || [];
-        // const RAMAN_ACTIVE = vibrationFrequencyMatrixMap.get(VIBRATION_FREQUENCY_TABLE_HEADERS_ENUM.RAMAN_ACTIVE) || [];
 
         const results = formatterFrequencyInfo(text, isPhonon)
 

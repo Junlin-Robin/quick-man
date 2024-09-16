@@ -1,10 +1,25 @@
 import { useState } from 'react';
 import { message } from 'antd';
-import type { FormType } from '../components/project-form/type';
+import type { FormType, IsotopeMassValueType } from '../components/project-form/type';
 import { PROJECT_INFO_KEY } from '../../../constants'
 import moment from 'moment';
 
 export type ProjectListType = (FormType & { id: string; createTime: number; updateTime?: number })[]
+
+/**
+ * 判断两次Form传入的同位素质量值是否相等
+ * @param historyIsotopeMass 历史值
+ * @param newIsotopeMass 新值
+ * @returns 布尔值（是否修改）
+ */
+function isSameIsotopeMass(historyIsotopeMass: IsotopeMassValueType, newIsotopeMass: IsotopeMassValueType) {
+    const { light: oldLightMass, heavy: oldHeavyMass } = historyIsotopeMass || {};
+    const { light: newLightMass, heavy: newHeavyMass } = newIsotopeMass || {};
+
+    if (!oldLightMass || !oldHeavyMass || !newLightMass || !newHeavyMass) return false;
+    //此处仅比较round值
+    return oldLightMass.round === newLightMass.round && oldHeavyMass.round === newHeavyMass.round;
+}
 
 /**
  * 用于判断浏览器是否支持localStorage，不支持直接刨除异常，需要捕获
@@ -78,6 +93,18 @@ export function useCreateOrModifiedProject() {
 
         const existIdIndex = historyProjectIdList.findIndex((item) => item?.id === id);
 
+        //新建项目增加储存当前工程详情的数据
+        if (existIdIndex === -1) localStorage.setItem(id, JSON.stringify({ taskNumber: 0 }));
+        else {
+            //编辑场景先判断是否存在已有的计算任务，如果有则检查是否修改了元素、同位素质量等关键信息，有则报错，没有通过
+            const { calculationElement: historyElement, isotopeMass: historyIsotopeMass } = historyProjectIdList[existIdIndex];
+            const { calculationElement: newElement, isotopeMass: newIsotopeMass } = formValue;
+            const taskNumber = JSON.parse(localStorage.getItem(id) || '')?.taskNumber || 0;
+            if (taskNumber > 0 && (historyElement !== newElement || !isSameIsotopeMass(historyIsotopeMass, newIsotopeMass))) {
+                return rej(new Error('当前工程下已有计算任务，暂不允许修改同位素设置信息！'));
+            }
+        }
+
         let newProjectIdList = [];
 
         if (existIdIndex !== -1) {
@@ -102,8 +129,6 @@ export function useCreateOrModifiedProject() {
         } catch (error) {
             return rej(error);
         }
-
-        if (existIdIndex === -1) localStorage.setItem(id, JSON.stringify([]));
 
         //暂时设置随机不超过1s的延时，模拟等待
         setTimeout(() => {

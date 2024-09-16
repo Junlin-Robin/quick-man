@@ -10,6 +10,13 @@ import type { TaskDataType } from '../../../models';
 import { linearRegression, linearRegressionLine, rSquared } from 'simple-statistics';
 import decimal from 'decimal.js';
 
+import { getEnv } from '@/utils/get-env';
+
+
+//环境参数
+const env = getEnv();
+
+
 interface CalculateWorkerEvent {
     data: {
         waitToCalculateList: TaskDataType;
@@ -115,7 +122,6 @@ async function doForceConstantCalculate(params: { calculateParamList: CalculatPa
     let isSuccess = true;
     try {
         const calculateResults = await calculateForceConstantFromFrequency(calculateParamList);
-        console.log({calculateResults})
         calculatedTasks = waitToCalculateTasks.map((task, index) => ({
             ...task || {},
             updateTime: Date.now(),
@@ -136,6 +142,7 @@ async function doForceConstantCalculate(params: { calculateParamList: CalculatPa
     };
 }
 
+//单计算任务最小实现
 async function singleImpl(data: CalculateWorkerEvent['data'][number]) {
     const { waitToCalculateList, calculateType, TGradient = [] } = data || {};
     if (!waitToCalculateList || isEmpty(waitToCalculateList)) {
@@ -173,42 +180,20 @@ async function singleImpl(data: CalculateWorkerEvent['data'][number]) {
 
 self.onmessage = async (event: CalculateWorkerEvent) => {
     const data = event.data;
+
+    //用于打印信息
+    if (env === 'development') {
+        console.log('开始计算同位素分馏...');
+        console.log('计算参数：', data);
+        console.time('计算同位素用时：')
+    } else if (env === 'production') {
+        console.log('开始计算同位素分馏...');
+        console.time('计算同位素用时：')
+    }
+
     const resAll = await Promise.all(data.map((item) => singleImpl(item)));
 
-    self.postMessage(resAll);
-    // const { waitToCalculateList, calculateType, TGradient = [] } = event.data || {};
-    // console.log('worker接受计算消息', {waitToCalculateList, calculateType, TGradient})
-    // if (!waitToCalculateList || isEmpty(waitToCalculateList)) {
-    //     self.postMessage({
-    //         calculatedTasks: [],
-    //         isSuccess: true,
-    //     });
-    // }
-    // const params = formatParams(waitToCalculateList, calculateType);
-    // if (calculateType === CALCULATION_SERVICE.FORCE_CONSTANT) {
-    //     const { calculatedTasks, isSuccess } = await doForceConstantCalculate({
-    //         calculateParamList: params.map((item) => ({ ...item, TGradient })),
-    //         waitToCalculateTasks: waitToCalculateList
-    //     });
-    //     console.log('123', {calculatedTasks, isSuccess})
-    //     self.postMessage({
-    //         calculatedTasks,
-    //         isSuccess,
-    //     });
-    // } else if (calculateType === CALCULATION_SERVICE.ISOTOPE_FRACTIONATION) {
-    //     const { calculatedTasks, isSuccess } = await doFractionationCalculate({
-    //         calculateParamList: params.map((item) => ({ ...item, TGradient })),
-    //         waitToCalculateTasks: waitToCalculateList
-    //     })
-    //     self.postMessage({
-    //         calculatedTasks,
-    //         isSuccess,
-    //     });
-    // } else {
-    //     self.postMessage({
-    //         calculatedTasks: [],
-    //         isSuccess: true,
-    //     });
-    // }
+    if (env === 'development' || env === 'production') console.timeEnd('计算同位素用时：');
 
+    self.postMessage(resAll);
 };

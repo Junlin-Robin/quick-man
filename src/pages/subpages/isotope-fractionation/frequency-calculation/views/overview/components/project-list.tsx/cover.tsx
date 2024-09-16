@@ -21,7 +21,7 @@ export default function Cover(props: { element: string }) {
                 bottom: 0,
                 left: 0,
                 width: '100%',
-                height: '150px',
+                height: '100px',
                 background: 'linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(255, 255, 255, 0))',
                 backdropFilter: 'blur(.4px)',
             }}

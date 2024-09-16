@@ -63,7 +63,6 @@ function App() {
 
           // 派生变量，影响范围小
           // colorBgContainer: '#ffa940',
-          // fontSize: true ? 16 : undefined,
         },
         algorithm: systemTheme === 'light' ? [theme.defaultAlgorithm] : [theme.darkAlgorithm],
       }}

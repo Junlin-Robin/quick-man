@@ -6,6 +6,17 @@ import type { IsotopeMassValueType } from './type';
 
 import { Elements, ISOTOPE_TYPE } from '@/constants/element';
 
+export const IsotopeTypeOptions = [
+    {
+        label: '稳定同位素',
+        value: ISOTOPE_TYPE.STABLE,
+    },
+    {
+        label: '放射性同位素',
+        value: ISOTOPE_TYPE.RADIOACTIVE,
+    },
+];
+
 /**
  * 暂时人员选择列表，使用的组件暂时设置disabled
  * 后期在登陆功能开通后删除列表人员
@@ -24,7 +35,8 @@ export const temporaryPersonList = [
 /**
  * form实例暂时选中的值
  */
-export const InitialSelectedPersonValues = {
+export const InitialFormValues = {
+    isotopeType: ISOTOPE_TYPE.STABLE,
     readPermission: 1,
     editPermission: 1,
 };
@@ -48,9 +60,12 @@ export const IsotopeMassRules: Rule[] = [
     ({ getFieldValue }) => ({
         validator(_, value: IsotopeMassValueType) {
             const selectedElement = getFieldValue('calculationElement'); //选中的计算元素
+            const isotopeType = getFieldValue('isotopeType'); //同位素性质
             if (!selectedElement) return Promise.reject(new Error('未选择计算元素'));
+            if (!isotopeType || isEmpty(isotopeType)) return Promise.reject(new Error('未选择同位素性质'));
 
-            const massArray = Elements.find((ele) => ele.key === selectedElement)?.properties?.isotope?.filter((item) => item.type === ISOTOPE_TYPE.STABLE).map((item) => item.mass) || []; //查找到的元素可选的同位素质量列表
+            const massInfo = Elements.find((ele) => ele.key === selectedElement)?.properties?.isotope;
+            const massArray: string[] = massInfo?.filter((info) => isotopeType?.includes(info.type))?.map((info) => info.mass) || []; //查找到的元素可选的同位素质量列表
             const roundMassArray = massArray.map((item) => decimal.round(item));
             //常量设置问题，到 Elements 常量中修改。
             if (isEmpty(massArray)) return Promise.reject(new Error('未设置系统质量数，请反馈管理员修改'));

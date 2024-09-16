@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Card, Space, Button, Form, Segmented, message, Row,
@@ -165,9 +165,6 @@ export default function ProjectDetail(props: { id: string }) {
     }
   });
 
-  useEffect(() => { console.log({ calculationResults }) }, [calculationResults])
-
-
   return (
     <>
       <Space direction="vertical" style={{ width: '100%' }}>
@@ -179,7 +176,7 @@ export default function ProjectDetail(props: { id: string }) {
           <Segmented options={calculationServiceOptions} value={calculationType} onChange={(v) => setCalculationType(v)} />
         }>
           <Form form={form} colon onFinish={submit} onReset={reset} layout='horizontal' preserve={false}>
-            <Form.Item label="项目名字" name="taskIds" rules={[{ required: true, message: '至少选择一个任务' }]}>
+            <Form.Item label="计算任务" name="taskIds" rules={[{ required: true, message: '至少选择一个任务' }]}>
               <CascaderPro allowClear placeholder="请选择需要计算的任务" options={taskOptions} loading={loading} />
             </Form.Item>
             {
@@ -188,11 +185,18 @@ export default function ProjectDetail(props: { id: string }) {
                   label="温度梯度"
                   name="temperature_gradient"
                   rules={[{ required: true, message: '温度梯度不能为空' }]}
-                  initialValue='273.15；298.15；303.15；333.15；373.15；400；500；600；700；800；900；1000'>
+                  initialValue='273.15；298.15；303.15；333.15；373.15；400；500；600；700；800；900；1000'
+                  extra="温度梯度用于计算特定温度下同位素的分馏值，如果需要修改，请输入开尔文温度，并以中、英文逗号或者分号隔开">
                   <Input placeholder="请输入需要计算的温度梯度，以逗号分隔，单位为开尔文温度" style={{ width: '100%' }} addonAfter="K" />
                 </Form.Item>
               ) : (
-                <Form.Item label="温度选择" name="temperature" rules={[{ required: true, message: '温度设置不能为空' }]} initialValue={273.15}>
+                <Form.Item
+                  label="温度选择"
+                  name="temperature"
+                  rules={[{ required: true, message: '温度设置不能为空' }]}
+                  initialValue={273.15}
+                  extra="此温度用于计算力常数图解中纵坐标值，即此温度下对应同位素的分馏值，单位为开尔文温度"
+                >
                   <InputNumber addonAfter="K" placeholder='请填写需要对比的同位素分馏温度，用于作图显示，单位为开尔文温度' style={{ width: '100%' }} />
                 </Form.Item>
               )

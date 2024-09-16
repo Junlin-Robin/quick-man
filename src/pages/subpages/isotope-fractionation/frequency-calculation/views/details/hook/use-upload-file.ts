@@ -58,7 +58,7 @@ export function useDealFileUpload(key: string) {
             setLoading(true);
 
             db.table(key)?.filter((dataItem) => {
-                if (search) return dataItem?.taskDetail?.name.includes(search);
+                if (search) return dataItem?.name.includes(search);
                 return true;
             })?.toArray().then((result) => {
                 //暂时设置随机不超过1s的延时，模拟等待
@@ -104,12 +104,26 @@ export function useDealFileUpload(key: string) {
             return false;
         }
 
-        try {
-            await db.table(key)?.bulkDelete(Array.isArray(id) ? id : [id]);
-            return true;
-        } catch (error) {
+        const taskNumber = JSON.parse(localStorage.getItem(key) || '')?.taskNumber || 0;
+        if (taskNumber <= 0) {
+            message.error('系统错误，当前工程下没有任务，请联系管理员！');
             return false;
         }
+
+        let isSuccess = false;
+
+        try {
+            await db.table(key)?.bulkDelete(Array.isArray(id) ? id : [id]);
+            isSuccess = true;
+        } catch (error) {
+            isSuccess = false;
+        }
+
+        const newTaskNumber = taskNumber - (Array.isArray(id) ? id.length : 1);
+
+        localStorage.setItem(key, JSON.stringify({ taskNumber: newTaskNumber }));
+
+        return isSuccess;
 
     });
 
@@ -124,6 +138,8 @@ export function useDealFileUpload(key: string) {
             return rej(new Error('系统错误，未设置计算任务id，请联系管理员！'));
         }
 
+        const taskNumber = JSON.parse(localStorage.getItem(key) || '')?.taskNumber || 0;
+
         setLoading(true);
 
 
@@ -132,7 +148,10 @@ export function useDealFileUpload(key: string) {
                 db.table(key).update(id, newValue);
             } else {
                 db.table(key).add(newValue);
+                const newTaskNumber = taskNumber + 1;
+                localStorage.setItem(key, JSON.stringify({ taskNumber: newTaskNumber }));
             }
+            
             //暂时设置随机不超过1s的延时，模拟等待
             setTimeout(() => {
                 setLoading(false);

@@ -25,8 +25,6 @@ const ProjectCard = (props: Props) => {
 
     const serviceText = useMemo(() => {
         const nodeNameList = calculationService?.map((item) => {
-            console.log({ item });
-            console.log({ findNode: findNode(item, CalculationServiesOptions) });
             return findNode(item, CalculationServiesOptions)?.label
         }) || [];
         return nodeNameList?.join('、');

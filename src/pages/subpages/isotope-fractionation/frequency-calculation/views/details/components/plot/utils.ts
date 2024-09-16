@@ -40,7 +40,6 @@ export function formatterData(dataSource: CalculationResults, type: CALCULATION_
         const forceConstantData = dataSource?.map((dataItem) => {
             const forceConstant = dataItem.forceConstant;
             const frequency = dataItem.frequencyInfo;
-            console.log('111', {frequency, forceConstant})
             return {
                 category: dataItem.taskId,
                 name: dataItem.taskName,

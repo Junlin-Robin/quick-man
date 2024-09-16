@@ -13,6 +13,8 @@ import { isEmpty } from "lodash";
 
 import Marquee from 'react-fast-marquee';
 
+import styles from './style/index.module.less';
+
 const { useBreakpoint } = Grid;
 export default function FrequencyCalculation() {
   const [form] = Form.useForm();
@@ -25,12 +27,15 @@ export default function FrequencyCalculation() {
   const { createOrModifiedProject, loading } = useCreateOrModifiedProject();
   const { triggerGetProjects, loading: projectLoading, projectList } = useGetProjectList();
 
+  const [disabledProjectFormItems, setDisabledProjectFormItems] = useState<string[]>([]);
+
   useMount(() => {
     triggerGetProjects();
   })
 
   const openCreateDrawer = useMemoizedFn(() => {
     form.resetFields();
+    setDisabledProjectFormItems([]);
     setOpen(true);
     setProjectId(uuid());
     setIsEdit(false);
@@ -44,6 +49,9 @@ export default function FrequencyCalculation() {
   const handleEditProject = useMemoizedFn((projectId: string) => {
     setProjectId(projectId);
     form.setFieldsValue(projectList.find(item => item.id === projectId) || {});
+    const taskNumber = JSON.parse(localStorage.getItem(projectId) || '')?.taskNumber || 0;
+    if (taskNumber) setDisabledProjectFormItems(['calculationElement', 'isotopeMass']);
+    else setDisabledProjectFormItems([]);
     setOpen(true);
     setIsEdit(true);
   });
@@ -60,7 +68,6 @@ export default function FrequencyCalculation() {
       if (isSuccess) message.success(`工程${isEdit ? '修改' : '创建'}成功！`);
       else message.error(`工程${isEdit ? '修改' : '创建'}失败！`);
     } catch (error) {
-      console.log({ error })
       message.error(`工程${isEdit ? '修改' : '创建'}失败！${(error as Error)?.message as string || ''}`);
     }
     closeCreateDrawer(); //关闭抽屉
@@ -80,23 +87,33 @@ export default function FrequencyCalculation() {
 
   useEffect(() => {
     if (open) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflowY = 'hidden';
+      document.body.style.position = 'fixed';
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflowY = '';
+      document.body.style.position = '';
     }
 
     // 清理函数，确保在组件卸载时恢复滚动
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflowY = '';
+      document.body.style.position = '';
     };
   }, [open]);
   return (
     <>
       <PageHeader title="频率分馏计算" />
       <Space direction="vertical" style={{ width: '100%' }}>
-        <Alert message={<Marquee speed={25} delay={3} pauseOnHover={true}>
-          <span style={{ marginRight: '200px' }}>{pageInfoText}</span>
-        </Marquee>} type="info" showIcon closable />
+        <Alert
+          message={
+            <Marquee speed={25} delay={3} pauseOnHover={true}>
+              <span style={{ marginRight: '200px' }}>{pageInfoText}</span>
+            </Marquee>
+          }
+          type="info"
+          showIcon
+          closable
+        />
         <Row justify="space-between" gutter={12} wrap={false}>
           <Col flex={1}>
             <Input.Search placeholder="请输入工程名进行搜索" allowClear onSearch={(v) => {
@@ -134,12 +151,14 @@ export default function FrequencyCalculation() {
         onClose={closeCreateDrawer}
         open={open}
         size="large"
-        height="100vh"
+        height="70vh"
         maskClosable={false}
         footer={renderDrawerFooter()}
+        className={styles['drawer-container']}
+        closable={false}
       >
         <Spin spinning={loading}>
-          <ProjectForm form={form} required singleFormItem={!md} />
+          <ProjectForm form={form} required singleFormItem={!md} disabledFormItems={disabledProjectFormItems} />
         </Spin>
       </Drawer>
       <FloatButton.BackTop visibilityHeight={200} type="primary" style={{ marginBottom: 80 }} />

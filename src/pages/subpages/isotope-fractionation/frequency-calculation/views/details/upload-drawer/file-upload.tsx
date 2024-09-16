@@ -78,7 +78,6 @@ function judgeIsFitProjectSetting(props: {
 
 interface IProps {
     isEdit: boolean;
-    // onOk: (newValue: ProjectDataType[number], id: string) => Promise<boolean>;
     close: () => void;
     taskId?: string;
 }
@@ -106,10 +105,6 @@ export default function FileUpload(props: IProps) {
         else setIsDisabled(false);
     }, [isEdit])
 
-
-    useEffect(() => {
-        console.log({ taskItem })
-    }, [taskItem])
 
     const handleCleanFile = useMemoizedFn(() => {
         const editInitialValue = {

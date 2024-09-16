@@ -9,7 +9,6 @@ import {
 } from '@ant-design/icons';
 import LogoSrc from 'public/square-pants-logo.svg';
 import useWatchSystemTheme from '@/hooks/use-watch-system-theme';
-// import Logo from './components/logo';
 
 
 const items = [

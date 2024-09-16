@@ -5,21 +5,11 @@ import type { CalculationResults } from '../models';
 import type { TaskDataType } from '../../../models';
 import { CALCULATION_SERVICE, TASK_CALCULATION_STATUS } from '../../../constants';
 
-// import {
-//     judgeLocalStorageisAvailable,
-//     getAndParseValueInLoaclStorage,
-//     stringifyAndSetValueInLocalStorage,
-// } from "@/utils/operate-storage";
-
 import {
     DATA_BASE_NAME, INITIAL_DATA_BASE_VERSION, DATA_BASE_INDEX,
 } from '../../../constants';
 
 import Dexie from 'dexie';
-
-// import { calculateISOFractionationFromFrequencyByCASTEP } from "@/packages/castep/calculation/isotope-fractionation";
-// import { calculateForceConstantFromFrequency } from "@/packages/castep/calculation/force-constant";
-
 
 export default function useCalculateTasks(key: string) {
     const [loading, setLoading] = useState(false);
@@ -74,12 +64,13 @@ export default function useCalculateTasks(key: string) {
             /**待计算、或者频率存储值为空重新计算 */
             const isSameTGradient = isEqual(sortBy(existTemperature), sortBy(TGradientKelvin));
             const isNeedCalculate = isNil(existIsotopeFractionation) || isEmpty(existIsotopeFractionation) || !isSameTGradient;
-            console.log({ isSameTGradient, existTemperature, TGradient, isNeedCalculate })
             const isTaskError = taskStatus === TASK_CALCULATION_STATUS.FAILED;
             /**计算失败的不再进行计算 */
             if (!isTaskError && isNeedCalculate) waitToCalculateTasks.push(taskInfo);
             else alreadyCalculatedTasks.push(taskInfo);
         });
+
+        if (waitToCalculateTasks.some((task) => task.isPhonon) || waitToCalculateTasks?.length >= 3) message.info('本次计算时间较长，请耐心等待...');
 
         calculateWorker.postMessage([{
             waitToCalculateList: waitToCalculateTasks,
@@ -129,16 +120,8 @@ export default function useCalculateTasks(key: string) {
             }
         }));
 
-        // setTimeout(() => {
-        //     setLoading(false);
-        //     res(isSuccess);
-        // }, Math.random() * 2000);
-
         setLoading(false);
         return isSuccess;
-
-
-
     }
 
     async function calculateAndSaveForceConstant(params: {
@@ -146,7 +129,6 @@ export default function useCalculateTasks(key: string) {
         temperature?: { kelvin: string; celsius: string };
     }): Promise<boolean> {
         const { taskIdList, temperature = { kelvin: '273.15', celsius: '0' } } = params || {};
-        console.log({ taskIdList, temperature })
         /**没有传计算任务id，则直接设置空数组 */
         if (isNil(taskIdList) || isEmpty(taskIdList)) {
             setCalculationResults([]);
@@ -170,7 +152,6 @@ export default function useCalculateTasks(key: string) {
 
         taskIdList?.forEach((taskId) => {
             const taskInfo = storageAllTasksInfo.find((item) => item.id === taskId);
-            console.log({ taskInfo })
             if (isNil(taskInfo)) return;
             const existIsotopeFractionation = taskInfo.isotopeFractionation;
             const existForceConstant = taskInfo.forceConstant;
@@ -181,7 +162,6 @@ export default function useCalculateTasks(key: string) {
             const isNeedCalculateFractionation = isEmpty(existIsotopeFractionation) || isNil(existIsotopeFractionation) || !hasSameTemperature;
             const isNeedCalculateForceConstant = isNil(existForceConstant);
             const isTaskError = taskStatus === TASK_CALCULATION_STATUS.FAILED;
-            console.log({ isNeedCalculateForceConstant })
             if (!isTaskError) {
                 // 同位素分馏未计算的单独处理，会先执行计算分馏后再计算力常数
                 if (isNeedCalculateFractionation) {
@@ -196,12 +176,10 @@ export default function useCalculateTasks(key: string) {
                 alreadyCalculatedTasks.push(taskInfo);
             }
         });
-        console.log(1)
 
-        console.log({ waitToCalculateForceConstantTasks, waitToCalculateIsotopeFractionationTasks, alreadyCalculatedTasks })
-
-
-        console.log(2)
+        //提示
+        const waitToCalculateTasks = waitToCalculateIsotopeFractionationTasks.concat(waitToCalculateForceConstantTasks);
+        if (waitToCalculateTasks.some((task) => task.isPhonon) || waitToCalculateTasks?.length >= 3) message.info('本次计算时间较长，请耐心等待...');
 
 
         calculateWorker.postMessage([{
@@ -213,72 +191,26 @@ export default function useCalculateTasks(key: string) {
             calculateType: CALCULATION_SERVICE.FORCE_CONSTANT,
         }]);
 
-        const [{ calculatedTasks: ISOFractionationRes, isSuccess }, {calculatedTasks: yym, isSuccess: y}] = await new Promise<{
+        const [
+            { calculatedTasks: ISOFractionationRes, isSuccess },
+            { calculatedTasks: forceConstantRes, isSuccess: forceConstantSuccess },
+        ] = await new Promise<{
             calculatedTasks: TaskDataType, isSuccess: boolean
         }[]>((res) => {
             calculateWorker.onmessage = (e) => {
                 res(e.data);
             };
-            
         });
 
-
-        // const allIsotopeFractionation = taskIdList.map((taskId) => {
-        //     const temp = ISOFractionationRes.find((item) => item.id === taskId);
-        //     if (temp) return temp?.isotopeFractionation?.find((i) => i.T.kelvin === temperature.kelvin);
-        //     const exist = storageAllTasksInfo.find((item) => item.id === taskId);
-        //     return exist?.isotopeFractionation?.find((i) => i.T.kelvin === temperature.kelvin);
-        // });
-
-        // console.log({allIsotopeFractionation, ISOFractionationRes})
-
-        // if (!isEmpty(waitToCalculateIsotopeFractionationTasks)) {
-        //     const isSuccess = await calculateAndSaveFrequency({
-        //         taskIdList: waitToCalculateIsotopeFractionationTasks.map((item) => item.id),
-        //         // onlyCalculateSaveToIndexDB: false,
-        //     });
-        //     if (isSuccess) return calculateAndSaveForceConstant({ taskIdList });
-        //     else {
-        //         setCalculationResults([]);
-        //         return false;
-        //     }
-        // }
-
-
-
-
-        // const { calculatedTasks: yym, isSuccess } = await new Promise<{
-        //     calculatedTasks: TaskDataType, isSuccess: boolean
-        // }>((res) => {
-        //     const handleMessage = (e) => {
-        //         console.log('接受力常数计算消息', {yym: e.data})
-        //         calculateWorker.removeEventListener('message', handleMessage)
-        //         res(e.data);
-        //     };
-        //     calculateWorker.addEventListener('message', handleMessage);
-        //     calculateWorker.onmessage = (e) => {
-        //         console.log('接受力常数计算消息', {yym: e.data})
-        //         res(e.data);
-        //     }
-        //     calculateWorker.postMessage({
-        //         waitToCalculateList: waitToCalculateForceConstantTasks,
-        //         calculateType: CALCULATION_SERVICE.FORCE_CONSTANT,
-        //     });
-        // });
-
-
-
         const newAllTasksInfo = storageAllTasksInfo.map((task) => {
-            const newCalculateTask = yym.find((i) => i.id === task.id);
+            const newCalculateTask = forceConstantRes.find((i) => i.id === task.id);
             if (!isNil(newCalculateTask)) return newCalculateTask;
             return task;
         });
 
         await db.table(key).bulkPut(newAllTasksInfo);
 
-
-
-        setCalculationResults(yym.concat(alreadyCalculatedTasks).map((task) => {
+        setCalculationResults(forceConstantRes.concat(alreadyCalculatedTasks).map((task) => {
             const taskId = task.id;
             const taskName = task.name;
             const temp = ISOFractionationRes.find((item) => item.id === taskId);
@@ -288,7 +220,6 @@ export default function useCalculateTasks(key: string) {
             const isPhonon = task.isPhonon;
             const isotopeDetailSetting = task.isotopeSetting;
             const fractionationFittingLine = task.fractionationFittingLine;
-            console.log({ frequencyInfo })
             return {
                 taskId,
                 taskName,
@@ -307,15 +238,7 @@ export default function useCalculateTasks(key: string) {
         }));
 
         setLoading(false);
-        return isSuccess && y;
-
-
-        // return new Promise((res) => {
-        //     setTimeout(() => {
-        //         setLoading(false);
-        //         res(isSuccess);
-        //     }, Math.random() * 2000);
-        // })
+        return isSuccess && forceConstantSuccess;
 
     }
 

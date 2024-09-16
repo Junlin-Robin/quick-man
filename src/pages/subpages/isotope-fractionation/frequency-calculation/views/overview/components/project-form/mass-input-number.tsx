@@ -7,10 +7,11 @@ interface IProps {
     value?: IsotopeMassValueType;
     onChange?: (v: IsotopeMassValueType) => void;
     massArray: string[];
+    disabled?: boolean;
 }
 
 export default function MassInputNumber(props: IProps) {
-    const { value, onChange, massArray } = props;
+    const { value, onChange, massArray, disabled } = props;
 
     const handleLightIsotopeMassChange = (v: number | undefined | null) => {
         const precisionValue = massArray?.find((massItem) => decimal.round(massItem).toNumber() === v);
@@ -36,8 +37,8 @@ export default function MassInputNumber(props: IProps) {
 
     return (
         <Space>
-            <InputNumber addonBefore="轻" precision={0} value={value?.light?.round} onChange={handleLightIsotopeMassChange} />
-            <InputNumber addonBefore="重" precision={0} value={value?.heavy?.round} onChange={handleHeavyIsotopeMassChange} />
+            <InputNumber addonBefore="轻" precision={0} value={value?.light?.round} onChange={handleLightIsotopeMassChange} disabled={disabled} />
+            <InputNumber addonBefore="重" precision={0} value={value?.heavy?.round} onChange={handleHeavyIsotopeMassChange} disabled={disabled} />
         </Space>
     )
 }

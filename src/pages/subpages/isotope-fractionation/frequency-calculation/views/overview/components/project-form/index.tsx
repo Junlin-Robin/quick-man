@@ -9,9 +9,12 @@ import { Elements, ISOTOPE_TYPE } from '@/constants/element';
 import decimal from 'decimal.js';
 import MassInputNumber from './mass-input-number';
 // import CalculationServiceCascader from './service-cascader';
-import { temporaryPersonList, InitialSelectedPersonValues, IsotopeMassRules } from './constants';
+import { 
+  temporaryPersonList, InitialFormValues, IsotopeMassRules,
+  IsotopeTypeOptions,
+ } from './constants';
 import CascaderPro from '@/pages/components/cascader-pro';
-import {CalculationServiesOptions} from '../../../../constants';
+import { CalculationServiesOptions } from '../../../../constants';
 
 interface IProps {
   form: FormInstance;
@@ -20,6 +23,7 @@ interface IProps {
   };
   singleFormItem?: boolean;
   required?: boolean;
+  disabledFormItems?: string[];
 }
 
 // 可选的元素列表
@@ -29,7 +33,7 @@ const { useWatch } = Form;
 
 export default function ProjectForm(props: IProps) {
   const {
-    form, rules, singleFormItem = false, required = true,
+    form, rules, singleFormItem = false, required = true, disabledFormItems = [],
   } = props;
 
   //同位素
@@ -37,12 +41,31 @@ export default function ProjectForm(props: IProps) {
 
   const [eleOptions, setEleOptions] = useState<{ label: string | ReactNode, value: string }[]>(elementOptions);
 
+  const handleSearchElement = (value: string) => {
+    if (!value) return setEleOptions(elementOptions);
+    const filtered = elementOptions.filter((ele) => ele.label.toLocaleLowerCase().includes(value.toLocaleLowerCase()));
+    const nodes = filtered.map((ele) => ({
+      ...ele,
+      label: (
+        <span>
+          {ele.label.split(new RegExp(`(${value})`, 'gi')).map((part, index) => (
+            part.toLowerCase() === value.toLowerCase() ? <span key={index} style={{ color: 'orange' }}>{part}</span> : part
+          ))}
+        </span>
+      ),
+    }));
+    setEleOptions(nodes);
+  }
+
   //监听「计算元素」选择的值
   const selectedElement = useWatch('calculationElement', form);
 
+  const selectedIsotopeType: ISOTOPE_TYPE[] | undefined = useWatch('isotopeType', form);
+
   //根据「计算元素」值，查找同位素可选的质量数
   useEffect(() => {
-    const massArray: string[] = Elements.find((ele) => ele.key === selectedElement)?.properties?.isotope?.filter((item) => item.type === ISOTOPE_TYPE.STABLE).map((item) => item.mass) || [];
+    const massInfo = Elements.find((ele) => ele.key === selectedElement)?.properties?.isotope;
+    const massArray: string[] = massInfo?.filter((info) => selectedIsotopeType?.includes(info.type))?.map((info) => info.mass) || [];
     setIsotopeMassArray(massArray);
 
     const [lightMassRoundValue, heavyMassRoundValue] = [
@@ -63,7 +86,8 @@ export default function ProjectForm(props: IProps) {
     })
     //触发重新校验质量的规则
     form.validateFields(['isotopeMass'])
-  }, [form, selectedElement]);
+  }, [form, selectedElement, selectedIsotopeType]);
+
 
   return (
     <>
@@ -73,8 +97,7 @@ export default function ProjectForm(props: IProps) {
         colon
         layout="inline"
         onFinishFailed={() => message.error('请完整填写表单信息')}
-        initialValues={InitialSelectedPersonValues}
-      // onFinish={handleFinish}
+        initialValues={InitialFormValues}
       >
         <Row gutter={[12, 26]}>
           <Col span={singleFormItem ? 24 : 12}>
@@ -87,11 +110,11 @@ export default function ProjectForm(props: IProps) {
               <CascaderPro options={CalculationServiesOptions} showCheckedStrategy="SHOW_CHILD" placeholder="请选择计算服务" allowClear />
             </Form.Item>
           </Col>
-          {/* <Col span={singleFormItem ? 24 : 12}>
-            <Form.Item label="计算元素性质" name="calculationSe" rules={[...get(rules, 'calculationService') || [], { required, message: '计算服务不允许为空' }]} extra="建议全选">
-              <CascaderPro options={CalculationServiesOptions} showCheckedStrategy="SHOW_CHILD" placeholder="请选择计算服务" allowClear />
+          <Col span={singleFormItem ? 24 : 12}>
+            <Form.Item label="同位素性质" name="isotopeType" rules={[...get(rules, 'calculationService') || [], { required, message: '同位素性质不允许为空' }]} extra="目前仅支持稳定同位素计算，如需拓展服务请与管理员联系">
+              <Select options={IsotopeTypeOptions} placeholder="是否计算放射性同位素" allowClear mode='multiple' disabled />
             </Form.Item>
-          </Col> */}
+          </Col>
           <Col span={singleFormItem ? 24 : 12}>
             <Form.Item label="计算元素" name="calculationElement" rules={[...get(rules, 'calculationElement') || [], { required, message: '计算元素不允许为空' }]}>
               <Select
@@ -100,29 +123,16 @@ export default function ProjectForm(props: IProps) {
                 options={eleOptions}
                 allowClear
                 placeholder="请选择计算元素"
-                onSearch={(value) => {
-                  if (!value) return setEleOptions(elementOptions);
-                  const filtered = elementOptions.filter((ele) => ele.label.toLocaleLowerCase().includes(value.toLocaleLowerCase()));
-                  const nodes = filtered.map((ele) => ({
-                    ...ele,
-                    label: (
-                      <span>
-                        {ele.label.split(new RegExp(`(${value})`, 'gi')).map((part, index) => (
-                          part.toLowerCase() === value.toLowerCase() ? <span key={index} style={{ color: 'orange' }}>{part}</span> : part
-                        ))}
-                      </span>
-                    ),
-                  }));
-                  setEleOptions(nodes);
-                }}
+                onSearch={handleSearchElement}
                 onClear={() => setEleOptions(elementOptions)}
                 onSelect={() => setEleOptions(elementOptions)}
+                disabled={disabledFormItems.includes('calculationElement')}
               />
             </Form.Item>
           </Col>
           <Col span={singleFormItem ? 24 : 12}>
             <Form.Item label="同位素质量" name="isotopeMass" dependencies={['calculationElement']} rules={[...IsotopeMassRules, ...get(rules, 'isotopeMass') || []]}>
-              <MassInputNumber massArray={isotopeMassArray} />
+              <MassInputNumber massArray={isotopeMassArray} disabled={disabledFormItems.includes('isotopeMass')} />
             </Form.Item>
           </Col>
           <Col span={singleFormItem ? 24 : 12}>
