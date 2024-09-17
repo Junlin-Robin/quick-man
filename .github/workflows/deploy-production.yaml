@@ -148,7 +148,7 @@ jobs:
 
   publish-to-surge-page:
     runs-on: ubuntu-latest
-    needs: deploy-in-development
+    needs: deploy-in-production
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
