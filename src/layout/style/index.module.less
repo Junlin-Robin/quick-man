@@ -1,0 +1,48 @@
+@import '../../index.less';
+
+@header-height: 40px;
+@slider-width: 120px;
+
+.theme-light() {
+    .container {
+        background-color: @normal-theme-basic-bgc-color;
+        color: inherit;
+
+        .content {
+            background-color: @normal-theme-basic-bgc-color;
+            color: inherit;
+        }
+
+        .navigator, .slider, .footer {
+            background-color: @normal-theme-function-bgc-color;
+            color: inherit;
+        }
+    }
+    
+}
+
+.theme-dark() {
+    .container {
+        background-color: @dark-theme-basic-bgc-color;
+
+        .content {
+            background-color: @dark-theme-basic-bgc-color;
+        }
+
+        .navigator, .slider, .footer {
+            background-color: @dark-theme-function-bgc-color;
+        }
+    }
+}
+
+.container {
+    min-height: 100vh;
+    color: inherit;
+    width: 100vw;
+}
+
+.theme-light();
+
+@media (prefers-color-scheme: dark) {
+    .theme-dark();
+}

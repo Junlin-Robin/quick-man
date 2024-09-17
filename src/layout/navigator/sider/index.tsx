@@ -1,46 +1,84 @@
+import { useEffect, useState } from "react";
 import { Layout, Menu } from "antd";
-import styles from "./index.module.less";
+import { useMount } from "ahooks";
+import { useNavigate, useLocation } from 'react-router-dom';
+
+// import frequencyLogo from 'public/frequency.svg';
+// import forceConstant from 'public/force-constant.svg';
+import styles from "../../style/index.module.less";
+import useWatchSystemTheme from '@/hooks/use-watch-system-theme';
+
+import { MenuList } from "@/routers/constants";
 
 interface Iprops {
   style?: React.CSSProperties;
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+  isLargerThanMinWidth?: boolean;
 }
 
 export default function Sider(props: Iprops) {
-  const { style } = props;
+  const { collapsed, isLargerThanMinWidth, style } = props;
+  const theme = useWatchSystemTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [selectedKeys, setSelectedKeys] = useState('');
+
+
+  useEffect(() => {
+    setSelectedKeys(location.pathname);
+    // requestAnimationFrame(() => window.scrollTo({
+    //   top: 0,
+    //   left: 0,
+    //   // behavior: 'smooth',
+    // }))
+    window.scrollTo(0, 0);
+    
+  }, [location])
+
+  useMount(() => {
+    if (location.pathname === '/' || !location.pathname) {
+      navigate('/calculation/qm/isotope-fractionation/frequency')
+    }
+  });
 
   return (
-    <>
+    <div style={{ position: 'relative' }}>
       <Layout.Sider
-        className={styles["scroll"]}
-        breakpoint="lg"
-        collapsedWidth={0}
+        id="my_slider"
+        className={styles['slider']}
+        collapsible={!isLargerThanMinWidth}
+        collapsed={collapsed}
+        collapsedWidth={'100vw'}
+        width={(isLargerThanMinWidth ?? true) ? 150 : '100vw'}
         style={{
           overflow: "auto",
-          height: "calc(100vh - 26px)",
+          height: isLargerThanMinWidth ? "calc(100vh - 64px)" : (collapsed ? '0' : '100px'),
           position: "absolute",
-          top: 26,
+          top: 0,
           left: 0,
-          width: 200,
-          backgroundColor: "#eee",
-          // paddingTop: '48px',
-          // borderRight: '1px solid rgba(5, 5, 5, 0.06)',
+          bottom: 0,
+          transition: 'all .5s ease',
+          border: '1px solid rgba(5, 5, 5, 0.06)',
+          zIndex: 900,
           ...style,
         }}
+        trigger={null}
       >
         <Menu
-          // className={styles["scroll"]}
-          // style={{border: 'none'}}
-          defaultSelectedKeys={["1"]}
-          // theme="dark"
-          items={new Array(36).fill(0).map((_, index) => {
-            return {
-              key: index,
-              label: `test${index}`,
-            };
-          })}
-          style={{ overflowY: "auto" }}
+          defaultSelectedKeys={["castep-calculation"]}
+          selectedKeys={[selectedKeys]}
+          theme={theme}
+          items={MenuList.map((item) => ({
+            ...item,
+            icon: <img src={(theme === 'dark' ? item.icon.dark : item.icon.light)} style={{ width: '12px', height: '12px' }} />,
+            onClick: ({ key }) => navigate(key),
+          }))}
+          style={{ overflowY: "auto", backgroundColor: "transparent", border: 'none', padding: 0, margin: 0 }}
+          mode="inline"
         />
       </Layout.Sider>
-    </>
+    </div>
   );
 }

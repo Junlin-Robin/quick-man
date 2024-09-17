@@ -1,0 +1,28 @@
+//亮色背景、字体颜色
+@normal-theme-basic-bgc-color: #F5F5F5; //基础背景色，淡灰色
+@normal-theme-function-bgc-color: #fff; //功能区块背景色，亮白色
+@normal-theme-font-color: #000; //字体颜色
+
+
+//暗色背景、字体颜色
+@dark-theme-basic-bgc-color: #0d1116; //基础背景色
+@dark-theme-function-bgc-color: #000; //功能背景色
+@dark-theme-font-color: #fff; //字体色
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: @normal-theme-basic-bgc-color;
+  color: @normal-theme-font-color;
+  min-width: 360;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: @dark-theme-basic-bgc-color;
+    color: @dark-theme-font-color;
+  }
+}

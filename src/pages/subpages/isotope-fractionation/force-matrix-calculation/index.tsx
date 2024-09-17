@@ -1,4 +1,5 @@
-import { Typography } from "antd";
+import { Typography, Result } from "antd";
+import { SmileOutlined } from '@ant-design/icons'
 
 // import { useQueryParam, StringParam } from "use-query-params";
 
@@ -7,14 +8,12 @@ export default function FrequencyCalculation() {
 
   return (
     <>
-      <Typography.Title>力常数计算</Typography.Title>
-      {/* <Input
-        type="text"
-        value={search || ""}
-        onChange={(e) => {
-          console.log(e);
-        }}
-      /> */}
+      <Typography.Title level={5} style={{ marginTop: 0 }}>力常数计算</Typography.Title>
+      <Result
+        icon={<SmileOutlined />}
+        title="页面开发中..."
+        style={{ marginTop: 160 }}
+      />
     </>
   );
 }
