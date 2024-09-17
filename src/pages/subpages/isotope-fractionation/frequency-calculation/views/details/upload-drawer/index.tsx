@@ -93,8 +93,6 @@ export default function UploadDrawer(props: IProps) {
         setIsSelectAll(false);
     });
 
-
-
     useEffect(() => {
         if (visible) {
             triggerGetData?.();
