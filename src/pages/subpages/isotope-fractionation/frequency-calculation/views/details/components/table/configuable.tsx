@@ -11,13 +11,6 @@ export const useColumns: (type: CALCULATION_SERVICE) => ColumnsType<TableRecord>
             width: 120,
             dataIndex: 'name',
             fixed: 'left',
-            // onCell: (_, index?: number) => {
-            //     if (type === CALCULATION_SERVICE.ISOTOPE_FRACTIONATION) {
-            //         if ( (index ?? 0) % (TLength) === 0) return { rowSpan: (TLength) };
-            //         return { rowSpan: 0 }
-            //     }
-            //     return { rowSpan: 1 }
-            // }
         },
         ...(
             type === CALCULATION_SERVICE.ISOTOPE_FRACTIONATION ? ([
@@ -65,14 +58,6 @@ export const useColumns: (type: CALCULATION_SERVICE) => ColumnsType<TableRecord>
             title: '计算同位素',
             width: 110,
             dataIndex: 'isotope',
-            // onCell: (_, index?: number) => {
-            //     if (type === CALCULATION_SERVICE.ISOTOPE_FRACTIONATION) {
-            //         if ((index ?? 0) % (TLength) === 0)
-            //             return { rowSpan: (TLength) }
-            //         return { rowSpan: 0 }
-            //     }
-            //     return { rowSpan: 1 }
-            // }
         }, {
             title: '同位素质量',
             width: 220,
@@ -87,50 +72,18 @@ export const useColumns: (type: CALCULATION_SERVICE) => ColumnsType<TableRecord>
                     </>
                 )
             },
-            // onCell: (_, index?: number) => {
-            //     if (type === CALCULATION_SERVICE.ISOTOPE_FRACTIONATION) {
-            //         if ((index ?? 0) % (TLength) === 0)
-            //             return { rowSpan: (TLength) }
-            //         return { rowSpan: 0 }
-            //     }
-            //     return { rowSpan: 1 }
-            // }
         }, {
             title: '同位素原子数量',
             width: 130,
             dataIndex: 'isotopeNumber',
-            // onCell: (_, index?: number) => {
-            //     if (type === CALCULATION_SERVICE.ISOTOPE_FRACTIONATION) {
-            //         if ((index ?? 0) % (TLength) === 0)
-            //             return { rowSpan: (TLength) }
-            //         return { rowSpan: 0 }
-            //     }
-            //     return { rowSpan: 1 }
-            // }
         }, {
             title: '固定同位素原子数量',
             width: 160,
             dataIndex: 'fixedIsotopeNumber',
-            // onCell: (_, index?: number) => {
-            //     if (type === CALCULATION_SERVICE.ISOTOPE_FRACTIONATION) {
-            //         if ((index ?? 0) % (TLength) === 0)
-            //             return { rowSpan: (TLength) }
-            //         return { rowSpan: 0 }
-            //     }
-            //     return { rowSpan: 1 }
-            // }
         }, {
             title: '计算模式',
             width: 100,
             dataIndex: 'calculationMethod',
-            // onCell: (_, index?: number) => {
-            //     if (type === CALCULATION_SERVICE.ISOTOPE_FRACTIONATION) {
-            //         if ((index ?? 0) % (TLength) === 0)
-            //             return { rowSpan: (TLength) }
-            //         return { rowSpan: 0 }
-            //     }
-            //     return { rowSpan: 1 }
-            // }
         },
     ], [type])
 }

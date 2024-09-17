@@ -24,6 +24,9 @@ export default function FrequencyCalculation() {
   const [isSearch, setIsSearch] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
 
+  //已有计算任务对于工程信息的修改提示
+  const [warnMessage, setWarnMessage] = useState('');
+
   const { createOrModifiedProject, loading } = useCreateOrModifiedProject();
   const { triggerGetProjects, loading: projectLoading, projectList } = useGetProjectList();
 
@@ -50,7 +53,10 @@ export default function FrequencyCalculation() {
     setProjectId(projectId);
     form.setFieldsValue(projectList.find(item => item.id === projectId) || {});
     const taskNumber = JSON.parse(localStorage.getItem(projectId) || '')?.taskNumber || 0;
-    if (taskNumber) setDisabledProjectFormItems(['calculationElement', 'isotopeMass']);
+    if (taskNumber) {
+      setDisabledProjectFormItems(['calculationElement', 'isotopeMass']);
+      setWarnMessage('该工程已有计算任务，无法修改计算元素和同位素质量～')
+    }
     else setDisabledProjectFormItems([]);
     setOpen(true);
     setIsEdit(true);
@@ -58,6 +64,7 @@ export default function FrequencyCalculation() {
 
   const closeCreateDrawer = useMemoizedFn(() => {
     setOpen(false);
+    setWarnMessage('');
   });
 
   const createNewProject = useMemoizedFn(async () => {
@@ -157,6 +164,7 @@ export default function FrequencyCalculation() {
         className={styles['drawer-container']}
         closable={false}
       >
+        {warnMessage && <Alert message={warnMessage} type="warning" showIcon style={{ marginBottom: 20, marginTop: -10 }} banner />}
         <Spin spinning={loading}>
           <ProjectForm form={form} required singleFormItem={!md} disabledFormItems={disabledProjectFormItems} />
         </Spin>

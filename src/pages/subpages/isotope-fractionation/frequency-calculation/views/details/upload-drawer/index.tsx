@@ -20,6 +20,8 @@ import { isEmpty, isEqual, orderBy } from "lodash";
 
 import type { CheckboxProps } from 'antd';
 
+import styles from './style/index.module.less';
+
 interface IProps {
     visible: boolean;
     onClose: () => void;
@@ -115,14 +117,17 @@ export default function UploadDrawer(props: IProps) {
 
     useEffect(() => {
         if (visible) {
-            document.body.style.overflow = 'hidden';
+            document.body.style.overflowY = 'hidden';
+            document.body.style.position = 'fixed';
         } else {
-            document.body.style.overflow = '';
+            document.body.style.overflowY = '';
+            document.body.style.position = '';
         }
 
         // 清理函数，确保在组件卸载时恢复滚动
         return () => {
-            document.body.style.overflow = '';
+            document.body.style.overflowY = '';
+            document.body.style.position = '';
         };
     }, [visible]);
 
@@ -136,8 +141,9 @@ export default function UploadDrawer(props: IProps) {
                 open={visible}
                 onClose={handleClose}
                 placement={md ? 'right' : 'bottom'}
-                height="100vh"
+                height="86vh"
                 maskClosable={false}
+                className={styles['task-drawer']}
                 extra={(
                     <>
                         <Tooltip title={() => BatchCreateTaskDescription.split('\n').map((item) => <p style={{ textAlign: 'justify' }}>{item}</p>)}>

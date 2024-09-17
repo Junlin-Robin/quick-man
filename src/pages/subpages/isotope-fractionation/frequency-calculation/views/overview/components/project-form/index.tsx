@@ -116,7 +116,7 @@ export default function ProjectForm(props: IProps) {
             </Form.Item>
           </Col>
           <Col span={singleFormItem ? 24 : 12}>
-            <Form.Item label="计算元素" name="calculationElement" rules={[...get(rules, 'calculationElement') || [], { required, message: '计算元素不允许为空' }]}>
+            <Form.Item label="计算元素" name="calculationElement" rules={[...get(rules, 'calculationElement') || [], { required, message: '计算元素不允许为空' }]} extra="目前仅支持常见元素，如需要拓展请联系管理员～">
               <Select
                 showSearch
                 filterOption={false}

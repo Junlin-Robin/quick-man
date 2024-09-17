@@ -7,10 +7,36 @@ export const TableHeaderMap = Object.freeze({
     beta: 'β',
     fractionation: '1000lnβ（‰）',
     thousand_Beta_minor: '1000(β-1)（‰）',
-    forceConstant: '力常数',
+    forceConstant: '力常数（N/mN/mss）',
     isotope: '计算同位素',
     isotopeMass: '同位素质量',
     isotopeNumber: '同位素原子数量',
     fixedIsotopeNumber: '固定同位素原子数量',
     calculationMethod: '计算模式',
 });
+
+export const ISOTOPE_FRACTIONATION_TableHeaderList = [
+    'name', 
+    'celsius',
+    'kelvin',
+    'thousand_div_T',
+    'thousand_div_T_square',
+    'beta',
+    'fractionation',
+    'thousand_Beta_minor',
+    'isotope',
+    'isotopeMass',
+    'isotopeNumber',
+    'fixedIsotopeNumber',
+    'calculationMethod',
+];
+
+export const FORCE_CONSTANT_TableHeaderList = [
+    'name', 
+    'forceConstant',
+    'isotope',
+    'isotopeMass',
+    'isotopeNumber',
+    'fixedIsotopeNumber',
+    'calculationMethod',
+];

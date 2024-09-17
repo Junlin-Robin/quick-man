@@ -5,7 +5,11 @@ import * as xlsx from 'xlsx';
 
 import { useColumns } from './configuable';
 import { formatterData } from './utils';
-import { TableHeaderMap } from './constants';
+import {
+    TableHeaderMap,
+    ISOTOPE_FRACTIONATION_TableHeaderList,
+    FORCE_CONSTANT_TableHeaderList,
+} from './constants';
 
 import { CALCULATION_SERVICE, CalculationServiceMap } from '../../../../constants';
 
@@ -28,15 +32,25 @@ export default function FrequencyTableCard(props: IProps) {
 
     const data = useMemo(() => formatterData(dataSource, type), [dataSource, type]);
 
+    const tableHeaderList = useMemo(() => {
+        switch (type) {
+            case CALCULATION_SERVICE.FORCE_CONSTANT:
+                return FORCE_CONSTANT_TableHeaderList;
+            case CALCULATION_SERVICE.ISOTOPE_FRACTIONATION:
+                return ISOTOPE_FRACTIONATION_TableHeaderList;
+            default:
+                return [];
+        }
+    }, [type]);
+
     const downloadExcel = useMemoizedFn(() => {
         try {
             const worksheet = xlsx.utils.json_to_sheet(data.map((item) => {
-                const newDataItem = Object.entries(item).reduce((acc: { [k: string]: unknown }, [key, value]) => {
-                    if (key === 'id' || key === 'taskId') return acc;
-                    const newKey = TableHeaderMap[key as keyof typeof TableHeaderMap];
-                    // if (key === 'isotopeMass') value = value.join('\n');
-                    acc[newKey as keyof typeof acc] = key === 'isotopeMass' ? value.join('\n') : value;
-                    return acc;
+                const newDataItem = tableHeaderList.reduce((acc: { [k: string]: unknown }, cur) => {
+                    const newKey = TableHeaderMap[cur as keyof typeof TableHeaderMap];
+                    const newValue = cur === 'isotopeMass' ? (item[cur as keyof typeof item] as string[])?.join('\n') : item[cur as keyof typeof item];
+
+                    return { ...acc, [newKey]: newValue }
                 }, {});
                 return newDataItem;
             }));

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Card, Space, Button, Form, Segmented, message, Row,
   InputNumber, Input,
+  Tooltip,
 } from 'antd';
 import { useMemoizedFn } from 'ahooks';
 import PageHeader from '@/pages/components/page-header';
@@ -27,6 +28,7 @@ import { projectDetailState } from './constants/atoms';
  */
 import type { ProjectListType } from '../overview/hooks/use-operate-project';
 import decimal from 'decimal.js';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 
 /**
@@ -169,7 +171,15 @@ export default function ProjectDetail(props: { id: string }) {
     <>
       <Space direction="vertical" style={{ width: '100%' }}>
         <PageHeader
-          title={[(<Link to="/calculation/qm/isotope-fractionation/frequency" style={{ fontSize: '16px' }}>频率分馏计算</Link>), <span style={{ fontSize: '16px' }}>工程详情</span>]}
+          title={[
+            (<Link to="/calculation/qm/isotope-fractionation/frequency" style={{ fontSize: '16px' }}>频率分馏计算</Link>),
+            (<Space>
+              <span style={{ fontSize: '16px' }}>工程详情</span>
+              <Tooltip title="请先点击任务列表上传文件，一个构型对应一个计算任务。将需要准备轻同位素和重同位素计算文件，如果有固定有计算的同位素原子，还需要准备cell文件。目前仅支持CASTEP的文件计算。">
+                <QuestionCircleOutlined />
+              </Tooltip>
+            </Space>),
+          ]}
           extra={<Button type='link' onClick={openTaskListDrawer}>任务列表</Button>}
         />
         <Card title="计算设置" extra={
